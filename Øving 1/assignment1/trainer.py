@@ -72,7 +72,8 @@ class BaseTrainer:
             accuracy={}
         )
 
-        last_val_loss = np.ones(10) #Keeps track of last 10 val_loss values
+        lowest_loss = np.Inf
+        stop_index = 0
 
         global_step = 0
 
@@ -95,20 +96,16 @@ class BaseTrainer:
                     # You can access the validation loss in val_history["loss"]
                     
                     #Adds last val_loss value and removes first
-                    last_val_loss = np.append(last_val_loss[1:], val_loss.copy())
                     
-
-                    loss_values = [pair[1] for pair in
-                                 sorted(list(val_history["loss"].items()),
-                                        key=lambda x: x[0])]
-
-                    # if(len(loss_values) >= 10):
-                    #     if any(np.diff(loss_values[-10:]) < 0):
-                    #         print(loss_values)
-                    #         print("Stopped after ", epoch, " epochs")
-                    #         return train_history, val_history
-
-
+                    if val_loss < lowest_loss: 
+                        stop_index = 0
+                        lowest_loss = val_loss
+                    
+                    if stop_index >= 10:
+                        print("Stopped after ", epoch, " epochs")
+                        return train_history, val_history
+                        
+                    stop_index += 1 
 
                 global_step += 1
 
