@@ -14,10 +14,10 @@ def pre_process_images(X: np.ndarray):
         f"X.shape[1]: {X.shape[1]}, should be 784"
     # TODO implement this function (Task 2a)
 
-    X = X*2/255 - 1  # change range from  0-255 to -1 - 1
-    X = np.concatenate((np.ones((X.shape[0],1)), X), axis=1) # bias trick
+    X_copy = X/127.5 - 1  # change range from  0:255 to -1:1
+    X_copy = np.insert(X_copy, X_copy.shape[1], 1 , axis=1) # bias trick
 
-    return X
+    return X_copy
 
 
 def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
@@ -34,7 +34,7 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
 
     C = -(targets * np.log(outputs) + (1-targets)*np.log(1-outputs))
 
-    return np.sum(C)/targets.shape[0]
+    return np.mean(C)
 
 
 
@@ -56,13 +56,10 @@ class BinaryModel:
         """
         # TODO implement this function (Task 2a)
 
-        y = np.zeros((X.shape[0],1))
 
-        for i in range(X.shape[0]):
-            z = self.w.T.dot(X[i].reshape((X[i].shape[0],1)))        #dot(w,x)
-            y[i] = 1/(1 + np.exp(z))    #Sigmoid
+        sig = 1/(1 + np.exp(-X.dot(self.w)))
 
-        return y
+        return sig
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
         """
@@ -79,8 +76,10 @@ class BinaryModel:
         assert self.grad.shape == self.w.shape,\
             f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
 
-        grads = -np.dot(X.T, -(targets - outputs)).reshape((X.shape[1],1))                    #Calculating all weight gradients
+        grads = np.dot(-X.T, (targets - outputs))
+
         self.grad = grads/X.shape[0]   #Averaging all gradients
+
 
     def zero_grad(self) -> None:
         self.grad = None
