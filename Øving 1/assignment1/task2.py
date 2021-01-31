@@ -44,8 +44,9 @@ class LogisticTrainer(BaseTrainer):
         # DONE: Implement this function (task 2b)
         outputs = self.model.forward(X_batch)
         self.model.backward(X_batch, outputs, Y_batch)
-        loss = cross_entropy_loss(Y_batch, outputs)
+        self.model.w -= self.learning_rate * self.model.grad
 
+        loss = cross_entropy_loss(Y_batch, outputs)
         return loss
 
     def validation_step(self):
@@ -125,34 +126,34 @@ if __name__ == "__main__":
     plt.savefig("task2b_binary_train_accuracy.png")
     plt.show()
 
-    # Task 2e - Create a comparison between training with and without shuffling
-    shuffle_dataset = True
-    # Intialize model
-    model = BinaryModel()
-    # Train model
-    trainer = LogisticTrainer(
-        model, learning_rate, batch_size, shuffle_dataset,
-        X_train, Y_train, X_val, Y_val,
-    )
-    train_history_shuffle, val_history_shuffle = trainer.train(num_epochs)
+    # # Task 2e - Create a comparison between training with and without shuffling
+    # shuffle_dataset = True
+    # # Intialize model
+    # model = BinaryModel()
+    # # Train model
+    # trainer = LogisticTrainer(
+    #     model, learning_rate, batch_size, shuffle_dataset,
+    #     X_train, Y_train, X_val, Y_val,
+    # )
+    # train_history_shuffle, val_history_shuffle = trainer.train(num_epochs)
 
-    plt.ylim([0., .2])
-    utils.plot_loss(train_history["loss"],
-                    "Training Loss", npoints_to_average=10)
-    utils.plot_loss(
-        train_history_shuffle["loss"], "Training Loss with shuffle", npoints_to_average=10)
-    plt.legend()
-    plt.xlabel("Number of Training Steps")
-    plt.ylabel("Cross Entropy Loss - Average")
-    plt.savefig("task2e_train_loss_with_shuffle.png")
-    plt.show()
+    # plt.ylim([0., .2])
+    # utils.plot_loss(train_history["loss"],
+    #                 "Training Loss", npoints_to_average=10)
+    # utils.plot_loss(
+    #     train_history_shuffle["loss"], "Training Loss with shuffle", npoints_to_average=10)
+    # plt.legend()
+    # plt.xlabel("Number of Training Steps")
+    # plt.ylabel("Cross Entropy Loss - Average")
+    # plt.savefig("task2e_train_loss_with_shuffle.png")
+    # plt.show()
 
-    plt.ylim([0.93, .99])
-    utils.plot_loss(val_history["accuracy"], "Validation Accuracy")
-    utils.plot_loss(
-        val_history_shuffle["accuracy"], "Validation Accuracy with shuffle")
-    plt.xlabel("Number of Training Steps")
-    plt.ylabel("Accuracy")
-    plt.legend()
-    plt.savefig("task2e_train_accuracy_shuffle_difference.png")
-    plt.show()
+    # plt.ylim([0.93, .99])
+    # utils.plot_loss(val_history["accuracy"], "Validation Accuracy")
+    # utils.plot_loss(
+    #     val_history_shuffle["accuracy"], "Validation Accuracy with shuffle")
+    # plt.xlabel("Number of Training Steps")
+    # plt.ylabel("Accuracy")
+    # plt.legend()
+    # plt.savefig("task2e_train_accuracy_shuffle_difference.png")
+    # plt.show()

@@ -14,10 +14,14 @@ def pre_process_images(X: np.ndarray):
         f"X.shape[1]: {X.shape[1]}, should be 784"
     # TODO implement this function (Task 2a)
 
-    X = X*2/255 - 1  # change range from  0-255 to -1 - 1
-    X = np.concatenate((np.ones((X.shape[0],1)), X), axis=1) # bias trick
+    #X_copy = X/127.5 - 1  # change range from  0-255 to -1 - 1
+    #X_copy = np.concatenate((np.ones((X.shape[0], 1)), X_copy), axis=1) # bias trick
 
-    return X
+    X_norm = np.empty((X.shape[0], X.shape[1] + 1), np.float32)
+    X_norm[:, :-1] = ((X.astype(np.float32) / 255.) - 0.5) * 2  # normalize
+    X_norm[:, -1] = 1
+
+    return X_norm
 
 
 def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
@@ -34,7 +38,7 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray) -> float:
 
     C = -(targets * np.log(outputs) + (1-targets)*np.log(1-outputs))
 
-    return np.sum(C)/targets.shape[0]
+    return np.mean(C)
 
 
 
@@ -55,14 +59,14 @@ class BinaryModel:
             y: output of model with shape [batch size, 1]
         """
         # TODO implement this function (Task 2a)
-
         y = np.zeros((X.shape[0],1))
 
-        for i in range(X.shape[0]):
-            z = self.w.T.dot(X[i].reshape((X[i].shape[0],1)))        #dot(w,x)
-            y[i] = 1/(1 + np.exp(z))    #Sigmoid
+        #for i in range(X.shape[0]):
+        #    z = self.w.T.dot(X[i].reshape((X[i].shape[0],1)))        #dot(w,x)
+        #    y[i] = 1/(1 + np.exp(z))    #Sigmoid
 
-        return y
+        sigmoid = 1/(1 + np.exp(-X @ self.w))
+        return sigmoid
 
     def backward(self, X: np.ndarray, outputs: np.ndarray, targets: np.ndarray) -> None:
         """
@@ -72,7 +76,7 @@ class BinaryModel:
             outputs: outputs of model of shape: [batch size, 1]
             targets: labels/targets of each image of shape: [batch size, 1]
         """
-        # TODO implement this function (Task 2a)
+        # DONE implement this function (Task 2a)
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
         self.grad = np.zeros_like(self.w)

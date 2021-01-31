@@ -13,7 +13,8 @@ class BaseTrainer:
             batch_size: int,
             shuffle_dataset: bool,
             X_train: np.ndarray, Y_train: np.ndarray,
-            X_val: np.ndarray, Y_val: np.ndarray,) -> None:
+            X_val: np.ndarray, Y_val: np.ndarray,
+            early_stopping=False) -> None:
         """
             Initialize the trainer responsible for performing the gradient descent loop.
         """
@@ -25,6 +26,7 @@ class BaseTrainer:
         self.batch_size = batch_size
         self.model = model
         self.shuffle_dataset = shuffle_dataset
+        self.early_stopping = early_stopping
 
     def validation_step(self):
         """
@@ -89,6 +91,25 @@ class BaseTrainer:
                     val_history["accuracy"][global_step] = accuracy_val
 
                     # TODO (Task 2d): Implement early stopping here.
+                    # last_val_losses = np.append(last_val_losses[1:], val_loss.copy())
+                    # #print(np.abs(np.mean(np.diff(last_val_losses))))
+                    # if np.abs(np.mean(np.diff(last_val_losses))) < 10**(-6) and last_val_losses[0] != 1:
+                    #     print("stopped training after", epoch, "epochs.")
+                    #     return train_history, val_history
+                    loss_array = [i[1] for i in
+                                 sorted(list(val_history["loss"].items()),
+                                        key=lambda x: x[0])]
+            
+                    if (self.early_stopping
+                        and len(loss_array) >= 10
+                        and np.count_nonzero(np.diff(loss_array[-10-1:]) > 0)):
+                        #and not any([i < loss_array[-stop_num - 1]
+                        #             for i in loss_array[-stop_num:]])):
+
+                        print(f'finished after {epoch} epochs')
+                        return train_history, val_history
+                        
+                    
                     # You can access the validation loss in val_history["loss"]
                 global_step += 1
         return train_history, val_history
