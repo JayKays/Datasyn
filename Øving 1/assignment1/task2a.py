@@ -79,7 +79,7 @@ class BinaryModel:
         assert self.grad.shape == self.w.shape,\
             f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
 
-        grads = -np.dot(X.T, -(targets - outputs)).reshape((X.shape[1],1))                    #Calculating all weight gradients
+        grads = -np.dot(X.T, -(targets - outputs)).reshape((X.shape[1],1))  #Calculating all weight gradients
         self.grad = grads/X.shape[0]   #Averaging all gradients
 
     def zero_grad(self) -> None:
