@@ -29,11 +29,15 @@ def batch_loader(
     if shuffle:
         np.random.shuffle(indices)
 
+    if shuffle: 
+        np.random.shuffle(indices)
+    
     for i in range(num_batches):
         # select a set of indices for each batch of samples
         batch_indices = indices[i*batch_size:(i+1)*batch_size]
         x = X[batch_indices]
         y = Y[batch_indices]
+
         # return both images (x) and labels (y)
         yield (x, y)
 
