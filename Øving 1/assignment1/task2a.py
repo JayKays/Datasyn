@@ -77,7 +77,6 @@ class BinaryModel:
             f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
 
         grads = np.dot(-X.T, (targets - outputs))
-
         self.grad = grads/X.shape[0]   #Averaging all gradients
 
 

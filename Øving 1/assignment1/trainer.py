@@ -14,7 +14,7 @@ class BaseTrainer:
             shuffle_dataset: bool,
             X_train: np.ndarray, Y_train: np.ndarray,
             X_val: np.ndarray, Y_val: np.ndarray,
-            early_stopping=False) -> None:
+            early_stopping=True) -> None:
         """
             Initialize the trainer responsible for performing the gradient descent loop.
         """
@@ -74,8 +74,8 @@ class BaseTrainer:
             accuracy={}
         )
 
-        last_val_loss = np.ones(10) #Keeps track of last 10 val_loss values
-
+        stop_index = 0
+        lowest_val = np.inf
         global_step = 0
 
         for epoch in range(num_epochs):
@@ -94,42 +94,16 @@ class BaseTrainer:
                     val_history["accuracy"][global_step] = accuracy_val
 
                     # TODO (Task 2d): Implement early stopping here.
-                    # last_val_losses = np.append(last_val_losses[1:], val_loss.copy())
-                    # #print(np.abs(np.mean(np.diff(last_val_losses))))
-                    # if np.abs(np.mean(np.diff(last_val_losses))) < 10**(-6) and last_val_losses[0] != 1:
-                    #     print("stopped training after", epoch, "epochs.")
-                    #     return train_history, val_history
-                    loss_array = [i[1] for i in
-                                 sorted(list(val_history["loss"].items()),
-                                        key=lambda x: x[0])]
-            
-                    if (self.early_stopping
-                        and len(loss_array) >= 10
-                        and np.count_nonzero(np.diff(loss_array[-10-1:]) > 0)):
-                        #and not any([i < loss_array[-stop_num - 1]
-                        #             for i in loss_array[-stop_num:]])):
-
-                        print(f'finished after {epoch} epochs')
+                    # You can access the validation loss in val_history["loss"]
+                    if val_loss < lowest_val:
+                        stop_index = 0
+                        lowest_val = val_loss
+                    
+                    if stop_index >= 10:
+                        print("early stop after", epoch, "epochs.")
                         return train_history, val_history
                         
-                    
-                    # You can access the validation loss in val_history["loss"]
-                    
-                    #Adds last val_loss value and removes first
-                    last_val_loss = np.append(last_val_loss[1:], val_loss.copy())
-                    
-
-                    loss_values = [pair[1] for pair in
-                                 sorted(list(val_history["loss"].items()),
-                                        key=lambda x: x[0])]
-
-                    # if(len(loss_values) >= 10):
-                    #     if any(np.diff(loss_values[-10:]) < 0):
-                    #         print(loss_values)
-                    #         print("Stopped after ", epoch, " epochs")
-                    #         return train_history, val_history
-
-
+                    stop_index += 1
 
                 global_step += 1
 

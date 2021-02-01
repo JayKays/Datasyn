@@ -17,7 +17,9 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: SoftmaxModel) 
         Accuracy (float)
     """
     # TODO: Implement this function (task 3c)
-    accuracy = 0
+    outputs = model.forward(X)
+    correct_predictions = np.count_nonzero(np.argmax(outputs, axis=1) == np.argmax(targets, axis=1))
+    accuracy = correct_predictions/X.shape[0]
     return accuracy
 
 
@@ -36,7 +38,11 @@ class SoftmaxTrainer(BaseTrainer):
             loss value (float) on batch
         """
         # TODO: Implement this function (task 3b)
-        loss = 0
+        Outputs = self.model.forward(X_batch)
+        self.model.backward(X_batch, Outputs, Y_batch)
+        self.model.w -= self.learning_rate * self.model.grad
+        loss = cross_entropy_loss(Y_batch, Outputs)
+
         return loss
 
     def validation_step(self):
@@ -65,7 +71,7 @@ if __name__ == "__main__":
     num_epochs = 50
     learning_rate = 0.01
     batch_size = 128
-    l2_reg_lambda = 0
+    l2_reg_lambda = 1
     shuffle_dataset = True
 
     # Load dataset
@@ -113,23 +119,23 @@ if __name__ == "__main__":
     plt.savefig("task3b_softmax_train_accuracy.png")
     plt.show()
 
-    # Train a model with L2 regularization (task 4b)
+    # # Train a model with L2 regularization (task 4b)
 
-    model1 = SoftmaxModel(l2_reg_lambda=1.0)
-    trainer = SoftmaxTrainer(
-        model1, learning_rate, batch_size, shuffle_dataset,
-        X_train, Y_train, X_val, Y_val,
-    )
-    train_history_reg01, val_history_reg01 = trainer.train(num_epochs)
-    # You can finish the rest of task 4 below this point.
+    # model1 = SoftmaxModel(l2_reg_lambda=1.0)
+    # trainer = SoftmaxTrainer(
+    #     model1, learning_rate, batch_size, shuffle_dataset,
+    #     X_train, Y_train, X_val, Y_val,
+    # )
+    # train_history_reg01, val_history_reg01 = trainer.train(num_epochs)
+    # # You can finish the rest of task 4 below this point.
 
-    # Plotting of softmax weights (Task 4b)
-    #plt.imsave("task4b_softmax_weight.png", weight, cmap="gray")
+    # # Plotting of softmax weights (Task 4b)
+    # #plt.imsave("task4b_softmax_weight.png", weight, cmap="gray")
 
-    # Plotting of accuracy for difference values of lambdas (task 4c)
-    l2_lambdas = [1, .1, .01, .001]
-    plt.savefig("task4c_l2_reg_accuracy.png")
+    # # Plotting of accuracy for difference values of lambdas (task 4c)
+    # l2_lambdas = [1, .1, .01, .001]
+    # plt.savefig("task4c_l2_reg_accuracy.png")
 
-    # Task 4d - Plotting of the l2 norm for each weight
+    # # Task 4d - Plotting of the l2 norm for each weight
 
-    plt.savefig("task4d_l2_reg_norms.png")
+    # plt.savefig("task4d_l2_reg_norms.png")
