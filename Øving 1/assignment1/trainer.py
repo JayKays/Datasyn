@@ -72,6 +72,7 @@ class BaseTrainer:
             accuracy={}
         )
 
+        #Parameters used for ealry stopping
         lowest_loss = np.Inf
         stop_index = 0
 
@@ -95,17 +96,19 @@ class BaseTrainer:
                     # TODO (Task 2d): Implement early stopping here.
                     # You can access the validation loss in val_history["loss"]
                     
-                    #Adds last val_loss value and removes first
-                    
+                    #Check for lower loss value, if none is found increment counter
                     if val_loss < lowest_loss: 
                         stop_index = 0
                         lowest_loss = val_loss
+                    else:
+                        stop_index += 1
                     
-                    if stop_index >= 10:
+                    #If we have gone 10 times without improving, stop training
+                    if stop_index > 10:
                         print("Stopped after ", epoch, " epochs")
                         return train_history, val_history
                         
-                    stop_index += 1 
+                     
 
                 global_step += 1
 

@@ -17,7 +17,9 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: BinaryModel) -
     """
     # TODO Implement this function (Task 2c)
 
-    outputs = model.forward(X)
+    outputs = model.forward(X) #Forward pass through network
+
+    #Counting number of correct classifications and dividing by total
     accuracy = np.count_nonzero((outputs >= 0.5) == targets)/X.shape[0]
 
     return accuracy
@@ -38,13 +40,13 @@ class LogisticTrainer(BaseTrainer):
             loss value (float) on batch
         """
         # TODO: Implement this function (task 2b)
-        Outputs = self.model.forward(X_batch)
+        Outputs = self.model.forward(X_batch)                   #Forward step
 
-        self.model.backward(X_batch, Outputs, Y_batch)
+        self.model.backward(X_batch, Outputs, Y_batch)          #Backward step
 
-        self.model.w -= self.learning_rate * self.model.grad
+        self.model.w -= self.learning_rate * self.model.grad    #Gradient descent step
 
-        loss = cross_entropy_loss(Y_batch, Outputs)
+        loss = cross_entropy_loss(Y_batch, Outputs)             #Calculating loss
 
         return loss
 

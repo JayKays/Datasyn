@@ -13,12 +13,12 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
         Cross entropy error (float)
     """
     # TODO implement this function (Task 3a)
-    C = -np.sum(targets* np.log(outputs), axis = 1)
+    C = np.mean(-np.sum(targets* np.log(outputs), axis = 1))
 
     assert targets.shape == outputs.shape,\
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
 
-    return np.mean(C)
+    return C
 
 
 class SoftmaxModel:
@@ -42,7 +42,6 @@ class SoftmaxModel:
             y: output of model with shape [batch size, num_outputs]
         """
         # TODO implement this function (Task 3a)
-
         y = np.exp(X @ self.w)/np.sum(np.exp(X @ self.w), axis = 1)[:, None]
 
         return y
@@ -60,15 +59,14 @@ class SoftmaxModel:
         # To implement L2 regularization task (4b) you can get the lambda value in self.l2_reg_lambda 
         # which is defined in the constructor.
 
-        
-
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
         self.grad = np.zeros_like(self.w)
         assert self.grad.shape == self.w.shape,\
              f"Grad shape: {self.grad.shape}, w: {self.w.shape}"
 
-        self.grad = (-X.T @ (targets - outputs) + 2*self.l2_reg_lambda*self.w)/X.shape[0]
+        #Gradient with added l2 reg.
+        self.grad = -X.T @ (targets - outputs)/X.shape[0] + 2*self.l2_reg_lambda*self.w
 
     def zero_grad(self) -> None:
         self.grad = None
@@ -82,7 +80,7 @@ def one_hot_encode(Y: np.ndarray, num_classes: int):
     Returns:
         Y: shape [Num examples, num classes]
     """
-
+    
     one_hot = np.array([[1 if i == target else 0 for i in  range(num_classes)] for target in Y])
 
     return one_hot
