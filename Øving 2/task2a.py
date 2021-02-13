@@ -50,7 +50,7 @@ class SoftmaxModel:
         # Always reset random seed before weight init to get comparable results.
         np.random.seed(1)
         # Define number of input nodes
-        self.I = None
+        self.I = 785
         self.use_improved_sigmoid = use_improved_sigmoid
 
         # Define number of output nodes
@@ -81,7 +81,7 @@ class SoftmaxModel:
         # such as self.hidden_layer_ouput = ...
         self.hidden_layer_output = 1/(1 + np.exp(-X.dot(self.ws[0]))) #Sigmoid of wT * x
         softmax = np.exp(self.hidden_layer_output.dot(self.ws[1]))
-        output = softmax/np.sum(softmax, axis = 1)
+        output = softmax/np.sum(softmax, axis = 1, keepdims=True)
 
         return output
 
@@ -95,7 +95,7 @@ class SoftmaxModel:
             outputs: outputs of model of shape: [batch size, num_outputs]
             targets: labels/targets of each image of shape: [batch size, num_classes]
         """
-        # DONE implement this function (Task 2b)
+        # TODO implement this function (Task 2b)
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
         # A list of gradients.
