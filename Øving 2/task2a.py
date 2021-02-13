@@ -100,7 +100,12 @@ class SoftmaxModel:
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
         # A list of gradients.
         # For example, self.grads[0] will be the gradient for the first hidden layer
-        self.grads = []
+        delta_k = outputs - targets
+        self.grads[1] = delta_k.T @ self.hidden_layer_output
+
+        sig_dot = self.hidden_layer_output / (1 - self.hidden_layer_output)
+        delta_j = sig_dot * delta_k.dot(self.ws[1].T)
+        self.grads[0] = delta_j.T * X
 
         for grad, w in zip(self.grads, self.ws):
             assert grad.shape == w.shape,\
