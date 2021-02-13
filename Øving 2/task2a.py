@@ -13,8 +13,13 @@ def pre_process_images(X: np.ndarray):
     """
     assert X.shape[1] == 784,\
         f"X.shape[1]: {X.shape[1]}, should be 784"
-    # TODO implement this function (Task 2a)
-    return X
+    # DONE implement this function (Task 2a)
+    mean = np.mean(X)
+    std = np.std(X)
+    X_norm = (X-mean)/std
+    X_norm = np.insert(X_norm, X_norm.shape[1], 1 , axis=1) # bias trick
+
+    return X_norm
 
 
 def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
@@ -74,7 +79,11 @@ class SoftmaxModel:
         # TODO implement this function (Task 2b)
         # HINT: For peforming the backward pass, you can save intermediate activations in varialbes in the forward pass.
         # such as self.hidden_layer_ouput = ...
-        return None
+        self.hidden_layer_output = 1/(1 + np.exp(-X.dot(self.ws[0]))) #Sigmoid of wT * x
+        softmax = np.exp(self.hidden_layer_output.dot(self.ws[1]))
+        output = softmax/np.sum(softmax, axis = 1)
+
+        return output
 
     def backward(self, X: np.ndarray, outputs: np.ndarray,
                  targets: np.ndarray) -> None:
@@ -86,7 +95,7 @@ class SoftmaxModel:
             outputs: outputs of model of shape: [batch size, num_outputs]
             targets: labels/targets of each image of shape: [batch size, num_classes]
         """
-        # TODO implement this function (Task 2b)
+        # DONE implement this function (Task 2b)
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
         # A list of gradients.
