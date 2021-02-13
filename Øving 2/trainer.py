@@ -11,7 +11,8 @@ class BaseTrainer:
             batch_size: int,
             shuffle_dataset: bool,
             X_train: np.ndarray, Y_train: np.ndarray,
-            X_val: np.ndarray, Y_val: np.ndarray,) -> None:
+            X_val: np.ndarray, Y_val: np.ndarray,
+            early_stopping = False) -> None:
         """
             Initialize the trainer responsible for performing the gradient descent loop.
         """
@@ -23,6 +24,7 @@ class BaseTrainer:
         self.batch_size = batch_size
         self.model = model
         self.shuffle_dataset = shuffle_dataset
+        self.early_stopping = early_stopping
 
     def validation_step(self):
         """
@@ -72,7 +74,10 @@ class BaseTrainer:
             accuracy={}
         )
 
+        stop_index = 0
+        lowest_val = np.inf
         global_step = 0
+
         for epoch in range(num_epochs):
             train_loader = utils.batch_loader(
                 self.X_train, self.Y_train, self.batch_size, shuffle=self.shuffle_dataset)
@@ -87,6 +92,16 @@ class BaseTrainer:
                     train_history["accuracy"][global_step] = accuracy_train
                     val_history["loss"][global_step] = val_loss
                     val_history["accuracy"][global_step] = accuracy_val
-                    # TODO: Implement early stopping (copy from last assignment)
+
+                    # DONE: Implement early stopping (copy from last assignment)
+                    if val_loss < lowest_val:
+                        stop_index = 0
+                        lowest_val = val_loss
+                    
+                    if stop_index >= 50:
+                        print("early stop after", epoch, "epochs.")
+                        return train_history, val_history
+                        
+                    stop_index += 1
                 global_step += 1
         return train_history, val_history
