@@ -37,11 +37,11 @@ class LogisticTrainer(BaseTrainer):
             loss value (float) on batch
         """
         # TODO: Implement this function (task 2b)
-        Outputs = self.model.forward(X_batch)
+        Outputs = self.model.forward(X_batch)                   #Forward step
 
-        self.model.backward(X_batch, Outputs, Y_batch)
+        self.model.backward(X_batch, Outputs, Y_batch)          #Backward step
 
-        self.model.w -= self.learning_rate * self.model.grad
+        self.model.w -= self.learning_rate * self.model.grad    #Gradient descent step
 
         loss = cross_entropy_loss(Y_batch, Outputs)
         return loss
