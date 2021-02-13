@@ -16,7 +16,9 @@ def calculate_accuracy(X: np.ndarray, targets: np.ndarray, model: SoftmaxModel) 
         Accuracy (float)
     """
     # TODO: Implement this function (copy from last assignment)
-    accuracy = 0
+    outputs = model.forward(X)
+    correct_predictions = np.count_nonzero(np.argmax(outputs, axis=1) == np.argmax(targets, axis=1))
+    accuracy = correct_predictions/X.shape[0]
     return accuracy
 
 
@@ -48,9 +50,14 @@ class SoftmaxTrainer(BaseTrainer):
         """
         # TODO: Implement this function (task 2c)
 
-        loss = 0
+        Outputs = self.model.forward(X_batch)
+        self.model.backward(X_batch, Outputs, Y_batch)
 
-        loss = cross_entropy_loss(Y_batch, logits)  # sol
+        #Gradient step for all layers
+        for i in range(len(self.model.neurons_per_layer)):
+            self.model.ws[i] -= self.learning_rate * self.model.grads[i]
+
+        loss = cross_entropy_loss(Y_batch, Outputs)
 
         return loss
 

@@ -34,7 +34,8 @@ def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
         f"Targets shape: {targets.shape}, outputs: {outputs.shape}"
 
     # DONE implement this function (Task 2a)
-    C = -(targets * np.log(outputs) + (1-targets)*np.log(1-outputs))
+
+    C = -np.sum(targets*np.log(outputs), axis=1)
 
     return np.mean(C)
 
@@ -64,7 +65,7 @@ class SoftmaxModel:
         for size in self.neurons_per_layer:
             w_shape = (prev, size)
             print("Initializing weight to shape:", w_shape)
-            w = np.zeros(w_shape)
+            w = np.random.uniform(-1, 1, w_shape)
             self.ws.append(w)
             prev = size
         self.grads = [None for i in range(len(self.ws))]
@@ -79,11 +80,14 @@ class SoftmaxModel:
         # TODO implement this function (Task 2b)
         # HINT: For peforming the backward pass, you can save intermediate activations in varialbes in the forward pass.
         # such as self.hidden_layer_ouput = ...
-        self.hidden_layer_output = 1/(1 + np.exp(-X.dot(self.ws[0]))) #Sigmoid of wT * x
-        softmax = np.exp(self.hidden_layer_output.dot(self.ws[1]))
-        y = softmax/np.sum(softmax, axis = 1, keepdims=True)
 
-        return y
+        self.hidden_layer_output = 1/(1 + np.exp(-X @ self.ws[0])) #Sigmoid of wT * x
+
+        softmax_num = np.exp(self.hidden_layer_output @ self.ws[1])
+        softmax_denum = np.sum(softmax_num, axis = 1, keepdims=True)
+        softmax = softmax_num/softmax_denum
+
+        return softmax
 
     def backward(self, X: np.ndarray, outputs: np.ndarray,
                  targets: np.ndarray) -> None:
@@ -100,12 +104,19 @@ class SoftmaxModel:
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
         # A list of gradients.
         # For example, self.grads[0] will be the gradient for the first hidden layer
-        delta_k = outputs - targets
-        self.grads[1] = self.hidden_layer_output.T.dot(delta_k) / targets.shape[0]#hvorfor dele her?
 
+        
+        # Derivative of activation from hidden layer
         sig_dot = self.hidden_layer_output * (1 - self.hidden_layer_output)
-        delta_j = sig_dot * delta_k.dot(self.ws[1].T)
-        self.grads[0] = X.T.dot(delta_j) / self.hidden_layer_output.shape[0]#hvorfor dele her?
+
+        #Deltas for different layers
+        delta_k = outputs - targets
+        delta_j = sig_dot * (delta_k @ self.ws[1].T)
+
+        #Calculating the gradients for both layers
+        self.grads[0] = X.T @ delta_j / self.hidden_layer_output.shape[0]
+        self.grads[1] = self.hidden_layer_output.T @ delta_k / targets.shape[0]
+
 
         for grad, w in zip(self.grads, self.ws):
             assert grad.shape == w.shape,\
