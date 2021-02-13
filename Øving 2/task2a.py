@@ -16,10 +16,10 @@ def pre_process_images(X: np.ndarray):
     # DONE implement this function (Task 2a)
     mean = np.mean(X)
     std = np.std(X)
-    X_norm = (X-mean)/std
-    X_norm = np.insert(X_norm, X_norm.shape[1], 1 , axis=1) # bias trick
+    X = (X-mean)/std
+    X = np.insert(X, X.shape[1], 1 , axis=1) # bias trick
 
-    return X_norm
+    return X
 
 
 def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
@@ -81,9 +81,9 @@ class SoftmaxModel:
         # such as self.hidden_layer_ouput = ...
         self.hidden_layer_output = 1/(1 + np.exp(-X.dot(self.ws[0]))) #Sigmoid of wT * x
         softmax = np.exp(self.hidden_layer_output.dot(self.ws[1]))
-        output = softmax/np.sum(softmax, axis = 1, keepdims=True)
+        y = softmax/np.sum(softmax, axis = 1, keepdims=True)
 
-        return output
+        return y
 
     def backward(self, X: np.ndarray, outputs: np.ndarray,
                  targets: np.ndarray) -> None:
@@ -101,11 +101,11 @@ class SoftmaxModel:
         # A list of gradients.
         # For example, self.grads[0] will be the gradient for the first hidden layer
         delta_k = outputs - targets
-        self.grads[1] = delta_k.T @ self.hidden_layer_output
+        self.grads[1] = self.hidden_layer_output.T.dot(delta_k) / targets.shape[0]#hvorfor dele her?
 
-        sig_dot = self.hidden_layer_output / (1 - self.hidden_layer_output)
+        sig_dot = self.hidden_layer_output * (1 - self.hidden_layer_output)
         delta_j = sig_dot * delta_k.dot(self.ws[1].T)
-        self.grads[0] = delta_j.T * X
+        self.grads[0] = X.T.dot(delta_j) / self.hidden_layer_output.shape[0]#hvorfor dele her?
 
         for grad, w in zip(self.grads, self.ws):
             assert grad.shape == w.shape,\
