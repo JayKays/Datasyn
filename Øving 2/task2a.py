@@ -21,6 +21,11 @@ def pre_process_images(X: np.ndarray):
 
     return X
 
+def sigmoid(z):
+    return 1/(1 + np.exp(-z))
+
+def softmax(z):
+    return np.exp(z) / np.sum(np.exp(z), axis=1,keepdims=True)
 
 def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
     """
@@ -65,10 +70,29 @@ class SoftmaxModel:
         for size in self.neurons_per_layer:
             w_shape = (prev, size)
             print("Initializing weight to shape:", w_shape)
-            w = np.random.uniform(-1, 1, w_shape)
+            if use_improved_weight_init:
+                w = np.random.normal(0, 1/np.sqrt(size), w_shape)
+            else:
+                w = np.random.uniform(-1, 1, w_shape)
             self.ws.append(w)
             prev = size
+
+
         self.grads = [None for i in range(len(self.ws))]
+        self.activations = [None for i in range(len(neurons_per_layer))]
+
+    def activation(self, z):
+        if self.use_improved_sigmoid:
+            return 1.7159 * np.tanh(z * 2/3)
+        else:
+            return sigmoid(z)
+
+    def activation_dot(self,z):
+        if self.use_improved_sigmoid:
+            return 1.7159 * 2/(3 * np.cosh(z*2/3)**2)
+        else:
+            return sigmoid(z)* (1 - sigmoid(z))
+
 
     def forward(self, X: np.ndarray) -> np.ndarray:
         """
@@ -81,14 +105,22 @@ class SoftmaxModel:
         # HINT: For peforming the backward pass, you can save intermediate activations in varialbes in the forward pass.
         # such as self.hidden_layer_ouput = ...
 
-        self.hidden_layer_output = 1/(1 + np.exp(-X @ self.ws[0])) #Sigmoid of wT * x
+        
+        # self.hidden_layer_output = self.activation(X @ self.ws[0])
 
-        softmax_num = np.exp(self.hidden_layer_output @ self.ws[1])
-        softmax_denum = np.sum(softmax_num, axis = 1, keepdims=True)
-        softmax = softmax_num/softmax_denum
+        act = X
+        self.activations[0] = act
 
-        return softmax
+        for i in range(len(self.neurons_per_layer)-1):
+            act = self.activation(self.activations[i] @ self.ws[i])
+            self.activations[i+1] = act
 
+        # self.activations[-1] = softmax(act @ self.ws[-1]) #Output
+
+        return softmax(act @ self.ws[-1])
+    
+
+    
     def backward(self, X: np.ndarray, outputs: np.ndarray,
                  targets: np.ndarray) -> None:
         """
@@ -105,25 +137,26 @@ class SoftmaxModel:
         # A list of gradients.
         # For example, self.grads[0] will be the gradient for the first hidden layer
 
+        #Gradient for output layer
+        delta_k = (outputs - targets)
+        self.grads[-1] = (self.activations[-1].T @ delta_k)/ targets.shape[0]
+
+        #Gradient of hidden layers
+        delta_j = delta_k
+        for i in range(len(self.neurons_per_layer)-1, 0, -1):
+            delta_j = self.activation_dot(self.activations[i-1] @ self.ws[i-1]) * (delta_j @ self.ws[i].T)
+
+            self.grads[i - 1] = (self.activations[i-1].T @ delta_j)/ targets.shape[0]
+
         
-        # Derivative of activation from hidden layer
-        sig_dot = self.hidden_layer_output * (1 - self.hidden_layer_output)
-
-        #Deltas for different layers
-        delta_k = outputs - targets
-        delta_j = sig_dot * (delta_k @ self.ws[1].T)
-
-        #Calculating the gradients for both layers
-        self.grads[0] = X.T @ delta_j / self.hidden_layer_output.shape[0]
-        self.grads[1] = self.hidden_layer_output.T @ delta_k / targets.shape[0]
-
-
         for grad, w in zip(self.grads, self.ws):
             assert grad.shape == w.shape,\
                 f"Expected the same shape. Grad shape: {grad.shape}, w: {w.shape}."
 
     def zero_grad(self) -> None:
         self.grads = [None for i in range(len(self.ws))]
+
+
 
 
 def one_hot_encode(Y: np.ndarray, num_classes: int):

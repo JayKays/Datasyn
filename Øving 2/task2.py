@@ -55,7 +55,14 @@ class SoftmaxTrainer(BaseTrainer):
 
         #Gradient step for all layers
         for i in range(len(self.model.neurons_per_layer)):
-            self.model.ws[i] -= self.learning_rate * self.model.grads[i]
+            if self.use_momentum:
+                self.previous_grads[i] = self.model.grads[i] \
+                    + self.momentum_gamma * self.previous_grads[i]
+
+                self.model.ws[i] -= self.learning_rate * self.previous_grads[i]
+
+            elif not self.use_momentum:
+                self.model.ws[i] -= self.learning_rate * self.model.grads[i]
 
         loss = cross_entropy_loss(Y_batch, Outputs)
 
