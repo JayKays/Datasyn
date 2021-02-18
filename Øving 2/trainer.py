@@ -1,7 +1,6 @@
 import numpy as np
 import utils
 
-
 class BaseTrainer:
 
     def __init__(
@@ -50,7 +49,7 @@ class BaseTrainer:
             loss value (float) on batch
         """
         pass
-
+    
     def train(
             self,
             num_epochs: int):

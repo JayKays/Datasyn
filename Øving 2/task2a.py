@@ -14,18 +14,24 @@ def pre_process_images(X: np.ndarray):
     assert X.shape[1] == 784,\
         f"X.shape[1]: {X.shape[1]}, should be 784"
     # DONE implement this function (Task 2a)
-    mean = np.mean(X)
-    std = np.std(X)
+    # mean = np.mean(X)
+    # std = np.std(X)
+
+    #Found by running np.mean() and np.std() over the training set
+    mean = 33.55274553571429
+    std = 78.87550070784701
     X = (X-mean)/std
     X = np.insert(X, X.shape[1], 1 , axis=1) # bias trick
 
     return X
 
+#Helper functions for sigmoid and softmax
 def sigmoid(z):
     return 1/(1 + np.exp(-z))
 
 def softmax(z):
-    return np.exp(z) / np.sum(np.exp(z), axis=1,keepdims=True)
+    return np.exp(z) / np.sum(np.exp(z), axis=1, keepdims=True)
+
 
 def cross_entropy_loss(targets: np.ndarray, outputs: np.ndarray):
     """
@@ -70,26 +76,33 @@ class SoftmaxModel:
         for size in self.neurons_per_layer:
             w_shape = (prev, size)
             print("Initializing weight to shape:", w_shape)
+
             if use_improved_weight_init:
-                w = np.random.normal(0, 1/np.sqrt(size), w_shape)
+                w = np.random.normal(0, 1/np.sqrt(prev), w_shape)   #Normal distribution (improved weights)
             else:
-                w = np.random.uniform(-1, 1, w_shape)
+                w = np.random.uniform(-1, 1, w_shape)               #Uniform distribution
+
             self.ws.append(w)
             prev = size
 
 
         self.grads = [None for i in range(len(self.ws))]
+
+        #Used to store all avtivation values between each layre in the network
         self.activations = [None for i in range(len(neurons_per_layer))]
 
+
+    #Activation function between layers (either sigmoid or improved sigmoid)
     def activation(self, z):
         if self.use_improved_sigmoid:
             return 1.7159 * np.tanh(z * 2/3)
         else:
             return sigmoid(z)
-
+    
+    #Derivative of activation function 
     def activation_dot(self,z):
         if self.use_improved_sigmoid:
-            return 1.7159 * 2/(3 * np.cosh(z*2/3)**2)
+            return 1.7159 * (4/3)/ (np.cosh(z*4/3) + 1)
         else:
             return sigmoid(z)* (1 - sigmoid(z))
 
@@ -105,18 +118,16 @@ class SoftmaxModel:
         # HINT: For peforming the backward pass, you can save intermediate activations in varialbes in the forward pass.
         # such as self.hidden_layer_ouput = ...
 
-        
-        # self.hidden_layer_output = self.activation(X @ self.ws[0])
-
+        #First "activation" is just the input
         act = X
         self.activations[0] = act
 
+        #Calculating the internal activations aj = f(zj) and storing them in self.activations
         for i in range(len(self.neurons_per_layer)-1):
             act = self.activation(self.activations[i] @ self.ws[i])
             self.activations[i+1] = act
 
-        # self.activations[-1] = softmax(act @ self.ws[-1]) #Output
-
+        #Returning output of the network
         return softmax(act @ self.ws[-1])
     
 
@@ -131,7 +142,7 @@ class SoftmaxModel:
             outputs: outputs of model of shape: [batch size, num_outputs]
             targets: labels/targets of each image of shape: [batch size, num_classes]
         """
-        # TODO implement this function (Task 2b)
+        # DONE implement this function (Task 2b)
         assert targets.shape == outputs.shape,\
             f"Output shape: {outputs.shape}, targets: {targets.shape}"
         # A list of gradients.
@@ -141,11 +152,10 @@ class SoftmaxModel:
         delta_k = (outputs - targets)
         self.grads[-1] = (self.activations[-1].T @ delta_k)/ targets.shape[0]
 
-        #Gradient of hidden layers
+        #Gradients for hidden layers (Running through all layers backwards)
         delta_j = delta_k
         for i in range(len(self.neurons_per_layer)-1, 0, -1):
             delta_j = self.activation_dot(self.activations[i-1] @ self.ws[i-1]) * (delta_j @ self.ws[i].T)
-
             self.grads[i - 1] = (self.activations[i-1].T @ delta_j)/ targets.shape[0]
 
         
@@ -212,6 +222,8 @@ if __name__ == "__main__":
         f"Expected the vector to be [0,0,0,1,0,0,0,0,0,0], but got {Y}"
 
     X_train, Y_train, *_ = utils.load_full_mnist()
+    # print("Mean: \t", np.mean(X_train))
+    # print("Std: \t", np.std(X_train))
     X_train = pre_process_images(X_train)
     Y_train = one_hot_encode(Y_train, 10)
     assert X_train.shape[1] == 785,\
