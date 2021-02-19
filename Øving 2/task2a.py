@@ -17,11 +17,12 @@ def pre_process_images(X: np.ndarray):
     # mean = np.mean(X)
     # std = np.std(X)
 
-    #Found by running np.mean() and np.std() over the training set
+    #Found by running np.mean() and np.std() on the training set
     mean = 33.55274553571429
     std = 78.87550070784701
-    X = (X-mean)/std
-    X = np.insert(X, X.shape[1], 1 , axis=1) # bias trick
+
+    X = (X-mean)/std                            #Normalizing
+    X = np.insert(X, X.shape[1], 1 , axis=1)    #Bias trick
 
     return X
 
@@ -87,7 +88,6 @@ class SoftmaxModel:
 
 
         self.grads = [None for i in range(len(self.ws))]
-
         #Used to store all avtivation values between each layre in the network
         self.activations = [None for i in range(len(neurons_per_layer))]
 
@@ -152,13 +152,12 @@ class SoftmaxModel:
         delta_k = (outputs - targets)
         self.grads[-1] = (self.activations[-1].T @ delta_k)/ targets.shape[0]
 
-        #Gradients for hidden layers (Running through all layers backwards)
+        #Gradients for hidden layers (Backpropagating the error from ouput)
         delta_j = delta_k
         for i in range(len(self.neurons_per_layer)-1, 0, -1):
             delta_j = self.activation_dot(self.activations[i-1] @ self.ws[i-1]) * (delta_j @ self.ws[i].T)
-            self.grads[i - 1] = (self.activations[i-1].T @ delta_j)/ targets.shape[0]
+            self.grads[i-1] = (self.activations[i-1].T @ delta_j)/ targets.shape[0]
 
-        
         for grad, w in zip(self.grads, self.ws):
             assert grad.shape == w.shape,\
                 f"Expected the same shape. Grad shape: {grad.shape}, w: {w.shape}."
