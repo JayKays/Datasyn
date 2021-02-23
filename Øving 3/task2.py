@@ -1,6 +1,8 @@
 import pathlib
+import torch
 import matplotlib.pyplot as plt
 import utils
+from utils import move_to
 from torch import nn
 from dataloaders import load_cifar10
 from trainer import Trainer, compute_loss_and_accuracy
@@ -23,23 +25,27 @@ class ExampleModel(nn.Module):
         self.num_classes = num_classes
         # Define the convolutional layers
         self.feature_extractor = nn.Sequential(
-            nn.Conv2d(
-                in_channels=image_channels,
-                out_channels=num_filters,
-                kernel_size=5,
-                stride=1,
-                padding=2
-            )
+            nn.Conv2d(3,32,5, padding=2),
+            nn.MaxPool2d(2,2),
+            nn.Conv2d(32,64,5, padding=2),
+            nn.MaxPool2d(2,2),
+            nn.Conv2d(64,128,5, padding=2),
+            nn.MaxPool2d(2,2),
+            nn.Flatten()
         )
         # The output of feature_extractor will be [batch_size, num_filters, 16, 16]
-        self.num_output_features = 32*32*32
+        self.num_output_features = 4*4*128
         # Initialize our last fully connected layer
         # Inputs all extracted features from the convolutional layers
         # Outputs num_classes predictions, 1 for each class.
         # There is no need for softmax activation function, as this is
         # included with nn.CrossEntropyLoss
+
         self.classifier = nn.Sequential(
-            nn.Linear(self.num_output_features, num_classes),
+            nn.Linear(self.num_output_features, 64),
+            nn.ReLU(),
+            nn.Linear(64, num_classes),
+            # nn.Softmax()
         )
 
     def forward(self, x):
@@ -50,7 +56,10 @@ class ExampleModel(nn.Module):
         """
         # TODO: Implement this function (Task  2a)
         batch_size = x.shape[0]
-        out = x
+
+        feat = self.feature_extractor(x) 
+        out = self.classifier(feat)
+
         expected_shape = (batch_size, self.num_classes)
         assert out.shape == (batch_size, self.num_classes),\
             f"Expected output of forward pass to be: {expected_shape}, but got: {out.shape}"
@@ -61,6 +70,16 @@ def create_plots(trainer: Trainer, name: str):
     plot_path = pathlib.Path("plots")
     plot_path.mkdir(exist_ok=True)
     # Save plots and show them
+    # device = torch.device("cpu")
+
+    # print(type(trainer.validation_history))
+    # print(type(trainer.validation_history["loss"]))
+    # print(type(trainer.validation_history["loss"][trainer.global_step]))
+
+    # trainer.train_history["loss"] = move_to(trainer.train_history["loss"], device)
+    # trainer.validation_history["loss"] = history_to_cpu(trainer.validation_history["loss"])
+    # trainer.validation_history["accuracy"] = history_to_cpu(trainer.validation_history["accuracy"])
+
     plt.figure(figsize=(20, 8))
     plt.subplot(1, 2, 1)
     plt.title("Cross Entropy Loss")
@@ -94,4 +113,5 @@ if __name__ == "__main__":
         dataloaders
     )
     trainer.train()
+    
     create_plots(trainer, "task2")

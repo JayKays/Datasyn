@@ -5,6 +5,7 @@ import time
 import collections
 import utils
 import pathlib
+import numpy as np
 
 
 def compute_loss_and_accuracy(
@@ -23,6 +24,9 @@ def compute_loss_and_accuracy(
     """
     average_loss = 0
     accuracy = 0
+    correct = 0
+    loss = 0
+    num_pictures = 0
     # TODO: Implement this function (Task  2a)
     with torch.no_grad():
         for (X_batch, Y_batch) in dataloader:
@@ -31,9 +35,23 @@ def compute_loss_and_accuracy(
             Y_batch = utils.to_cuda(Y_batch)
             # Forward pass the images through our model
             output_probs = model(X_batch)
-
             # Compute Loss and Accuracy
 
+            pred = torch.argmax(output_probs, dim =1)
+            correct += torch.sum(Y_batch == pred)
+            loss += loss_criterion(output_probs, Y_batch)
+            num_pictures += len(Y_batch)
+
+        accuracy = correct/num_pictures
+        average_loss = loss/len(dataloader)
+
+        #Sending tensors back to cpu for plotting
+        device = torch.device("cpu")
+        # accuracy.to(device)
+        # average_loss.to(device)
+
+        accuracy.cpu()
+        average_loss.cpu()
     return average_loss, accuracy
 
 

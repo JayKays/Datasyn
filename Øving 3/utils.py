@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pathlib
 import random
+import collections
 
 # Allow torch/cudnn to optimize/analyze the input/output shape of convolutions
 # To optimize forward/backward pass.
@@ -31,6 +32,44 @@ def to_cuda(elements):
         return elements.cuda()
     return elements
 
+def to_cpu(elements):
+    """
+    Transfers every object in elements to CPU RAM if available.    
+    """
+    if torch.cuda.is_available():
+        if type(elements) == torch.Tensor:
+            return elements.cpu()
+        elif type(elements) == dict:
+            new = {}
+            for key in elements.keys():
+                ten = to_cpu(elements[key])
+                new[key] = ten
+            return new
+        return elements.cpu()
+    return elements
+
+# def history_to_cpu(history):
+#     new = collections.OrderedDict()
+#     for key in history.keys():
+#         # print(type(history[key]))
+#         new[key] = history[key]
+#     return new
+
+# def move_to(obj, device):
+#     if torch.is_tensor(obj):
+#         return obj.to(device)
+#     elif isinstance(obj, dict):
+#         res = {}
+#         for k, v in obj.items():
+#             res[k] = move_to(v, device)
+#         return res
+#     elif isinstance(obj, list):
+#         res = []
+#         for v in obj:
+#             res.append(move_to(v, device))
+#         return res
+#     else:
+#         raise TypeError(f"Invalid type for move_to: {type(obj)}")
 
 def save_checkpoint(state_dict: dict,
                     filepath: pathlib.Path,
