@@ -46,13 +46,13 @@ def compute_loss_and_accuracy(
         average_loss = loss/len(dataloader)
 
         #Sending tensors back to cpu for plotting
-        device = torch.device("cpu")
+        # device = torch.device("cpu")
         # accuracy.to(device)
         # average_loss.to(device)
 
-        accuracy.cpu()
-        average_loss.cpu()
-    return average_loss, accuracy
+        # accuracy.cpu()
+        # average_loss.cpu()
+    return average_loss.detach().cpu().item(), accuracy.detach().cpu().item()
 
 
 class Trainer:

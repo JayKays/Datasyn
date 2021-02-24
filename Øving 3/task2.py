@@ -2,7 +2,6 @@ import pathlib
 import torch
 import matplotlib.pyplot as plt
 import utils
-from utils import move_to
 from torch import nn
 from dataloaders import load_cifar10
 from trainer import Trainer, compute_loss_and_accuracy
@@ -70,16 +69,6 @@ def create_plots(trainer: Trainer, name: str):
     plot_path = pathlib.Path("plots")
     plot_path.mkdir(exist_ok=True)
     # Save plots and show them
-    # device = torch.device("cpu")
-
-    # print(type(trainer.validation_history))
-    # print(type(trainer.validation_history["loss"]))
-    # print(type(trainer.validation_history["loss"][trainer.global_step]))
-
-    # trainer.train_history["loss"] = move_to(trainer.train_history["loss"], device)
-    # trainer.validation_history["loss"] = history_to_cpu(trainer.validation_history["loss"])
-    # trainer.validation_history["accuracy"] = history_to_cpu(trainer.validation_history["accuracy"])
-
     plt.figure(figsize=(20, 8))
     plt.subplot(1, 2, 1)
     plt.title("Cross Entropy Loss")
