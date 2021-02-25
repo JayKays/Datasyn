@@ -30,7 +30,6 @@ class ExampleModel(nn.Module):
             nn.MaxPool2d(2,2),
             nn.Conv2d(64,128,5, padding=2),
             nn.MaxPool2d(2,2),
-            nn.Flatten()
         )
         # The output of feature_extractor will be [batch_size, num_filters, 16, 16]
         self.num_output_features = 4*4*128
@@ -41,10 +40,10 @@ class ExampleModel(nn.Module):
         # included with nn.CrossEntropyLoss
 
         self.classifier = nn.Sequential(
+            nn.Flatten(),
             nn.Linear(self.num_output_features, 64),
             nn.ReLU(),
             nn.Linear(64, num_classes),
-            # nn.Softmax()
         )
 
     def forward(self, x):
