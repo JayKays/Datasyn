@@ -25,10 +25,20 @@ class ExampleModel(nn.Module):
         # Define the convolutional layers
         self.feature_extractor = nn.Sequential(
             nn.Conv2d(3,32,5, padding=2),
+            # nn.Dropout2d(p=0.05),
+            nn.ReLU(),
             nn.MaxPool2d(2,2),
+
+            nn.BatchNorm2d(32),
             nn.Conv2d(32,64,5, padding=2),
+            nn.Dropout2d(p=0.05),
+            nn.ReLU(),
             nn.MaxPool2d(2,2),
+
+            nn.BatchNorm2d(64),
             nn.Conv2d(64,128,5, padding=2),
+            nn.Dropout2d(p=0.05),
+            nn.ReLU(),
             nn.MaxPool2d(2,2),
         )
         # The output of feature_extractor will be [batch_size, num_filters, 16, 16]
@@ -41,8 +51,10 @@ class ExampleModel(nn.Module):
 
         self.classifier = nn.Sequential(
             nn.Flatten(),
+            nn.Dropout2d(p=0.2),
             nn.Linear(self.num_output_features, 64),
             nn.ReLU(),
+            nn.Dropout2d(p=0.2),
             nn.Linear(64, num_classes),
         )
 
@@ -63,6 +75,22 @@ class ExampleModel(nn.Module):
             f"Expected output of forward pass to be: {expected_shape}, but got: {out.shape}"
         return out
 
+def print_best_model(trainer: Trainer):
+
+    trainer.load_best_model()
+
+    trainer.model.eval()
+    train_loss, train_acc = compute_loss_and_accuracy(
+        trainer.dataloader_train, model, trainer.loss_criterion)
+    val_loss, val_acc = compute_loss_and_accuracy(
+        trainer.dataloader_val, model, trainer.loss_criterion)
+    test_loss, test_acc = compute_loss_and_accuracy(
+        trainer.dataloader_test, model, trainer.loss_criterion)
+    
+    print("Best model values:")
+    print(f"Train:\t Loss: {train_loss:.3f} \t Acc: {train_acc:.3f}")
+    print(f"Val  :\t Loss: {val_loss:.3f} \t Acc: {val_acc:.3f}")
+    print(f"Test :\t Loss: {test_loss:.3f} \t Acc: {test_acc:.3f}")
 
 def create_plots(trainer: Trainer, name: str):
     plot_path = pathlib.Path("plots")
@@ -101,5 +129,6 @@ if __name__ == "__main__":
         dataloaders
     )
     trainer.train()
-    
-    create_plots(trainer, "task2")
+
+    create_plots(trainer, "task3a_Batch_Norm_Dropout")
+    print_best_model(trainer)
