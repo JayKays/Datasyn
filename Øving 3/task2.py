@@ -25,20 +25,32 @@ class ExampleModel(nn.Module):
         # Define the convolutional layers
         self.feature_extractor = nn.Sequential(
             nn.Conv2d(3,32,5, padding=2),
-            # nn.Dropout2d(p=0.05),
             nn.ReLU(),
+            #nn.BatchNorm2d(32),
+            
             nn.MaxPool2d(2,2),
-
-            nn.BatchNorm2d(32),
+            #nn.Dropout2d(p=0.1),
+            
+            nn.Conv2d(32,32,5, padding=2),
+            nn.ReLU(),
+            #nn.BatchNorm2d(32),
+            
             nn.Conv2d(32,64,5, padding=2),
-            nn.Dropout2d(p=0.05),
             nn.ReLU(),
+            #nn.BatchNorm2d(64),
+            
             nn.MaxPool2d(2,2),
-
-            nn.BatchNorm2d(64),
-            nn.Conv2d(64,128,5, padding=2),
-            nn.Dropout2d(p=0.05),
+            #nn.Dropout(p=0.2),
+                    
+            nn.Conv2d(64,64,5, padding=2),
             nn.ReLU(),
+            #nn.BatchNorm2d(64),
+            
+            #nn.Dropout(p=0.2),
+
+            nn.Conv2d(64,128,5, padding=2),
+            nn.ReLU(),
+            #nn.BatchNorm2d(128),
             nn.MaxPool2d(2,2),
         )
         # The output of feature_extractor will be [batch_size, num_filters, 16, 16]
@@ -51,10 +63,10 @@ class ExampleModel(nn.Module):
 
         self.classifier = nn.Sequential(
             nn.Flatten(),
-            nn.Dropout2d(p=0.2),
+            #nn.Dropout2d(p=0.3),
             nn.Linear(self.num_output_features, 64),
             nn.ReLU(),
-            nn.Dropout2d(p=0.2),
+            #nn.Dropout2d(p=0.3),
             nn.Linear(64, num_classes),
         )
 
@@ -130,5 +142,5 @@ if __name__ == "__main__":
     )
     trainer.train()
 
-    create_plots(trainer, "task3a_Batch_Norm_Dropout")
+    create_plots(trainer, "task3_Multilayers")
     print_best_model(trainer)
