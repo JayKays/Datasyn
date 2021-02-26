@@ -5,6 +5,7 @@ import time
 import collections
 import utils
 import pathlib
+import numpy as np
 
 
 def compute_loss_and_accuracy(
@@ -23,6 +24,9 @@ def compute_loss_and_accuracy(
     """
     average_loss = 0
     accuracy = 0
+    correct = 0
+    loss = 0
+    num_pictures = 0
     # TODO: Implement this function (Task  2a)
     with torch.no_grad():
         for (X_batch, Y_batch) in dataloader:
@@ -31,10 +35,17 @@ def compute_loss_and_accuracy(
             Y_batch = utils.to_cuda(Y_batch)
             # Forward pass the images through our model
             output_probs = model(X_batch)
-
             # Compute Loss and Accuracy
 
-    return average_loss, accuracy
+            pred = torch.argmax(output_probs, dim =1)
+            correct += torch.sum(Y_batch == pred)
+            loss += loss_criterion(output_probs, Y_batch)
+            num_pictures += len(Y_batch)
+
+        accuracy = correct/num_pictures
+        average_loss = loss/len(dataloader)
+
+    return average_loss.detach().cpu().item(), accuracy.detach().cpu().item()
 
 
 class Trainer:
@@ -63,7 +74,7 @@ class Trainer:
         print(self.model)
 
         # Define our optimizer. SGD = Stochastich Gradient Descent
-        self.optimizer = torch.optim.SGD(self.model.parameters(),
+        self.optimizer = torch.optim.Adam(self.model.parameters(),
                                          self.learning_rate)
 
         # Load our dataset
@@ -92,6 +103,9 @@ class Trainer:
             Train, validation and test.
         """
         self.model.eval()
+        validation_loss, validation_acc = compute_loss_and_accuracy(
+            self.dataloader_val, self.model, self.loss_criterion
+        )
         validation_loss, validation_acc = compute_loss_and_accuracy(
             self.dataloader_val, self.model, self.loss_criterion
         )

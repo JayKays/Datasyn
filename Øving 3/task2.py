@@ -1,9 +1,11 @@
 import pathlib
+import torch
 import matplotlib.pyplot as plt
 import utils
 from torch import nn
 from dataloaders import load_cifar10
 from trainer import Trainer, compute_loss_and_accuracy
+from task4a import Model
 
 
 class ExampleModel(nn.Module):
@@ -23,23 +25,31 @@ class ExampleModel(nn.Module):
         self.num_classes = num_classes
         # Define the convolutional layers
         self.feature_extractor = nn.Sequential(
-            nn.Conv2d(
-                in_channels=image_channels,
-                out_channels=num_filters,
-                kernel_size=5,
-                stride=1,
-                padding=2
-            )
+            nn.Conv2d(3,32,5, padding=2),
+            nn.ReLU(),
+            nn.MaxPool2d(2,2),
+            
+            nn.Conv2d(32,64,5, padding=2),
+            nn.ReLU(),
+            nn.MaxPool2d(2,2),
+            
+            nn.Conv2d(64,128,5, padding=2),
+            nn.ReLU(),
+            nn.MaxPool2d(2,2),
         )
         # The output of feature_extractor will be [batch_size, num_filters, 16, 16]
-        self.num_output_features = 32*32*32
+        self.num_output_features = 4*4*128
         # Initialize our last fully connected layer
         # Inputs all extracted features from the convolutional layers
         # Outputs num_classes predictions, 1 for each class.
         # There is no need for softmax activation function, as this is
         # included with nn.CrossEntropyLoss
+
         self.classifier = nn.Sequential(
-            nn.Linear(self.num_output_features, num_classes),
+            nn.Flatten(),
+            nn.Linear(self.num_output_features, 64),
+            nn.ReLU(),
+            nn.Linear(64, num_classes),
         )
 
     def forward(self, x):
@@ -50,12 +60,31 @@ class ExampleModel(nn.Module):
         """
         # TODO: Implement this function (Task  2a)
         batch_size = x.shape[0]
-        out = x
+
+        feat = self.feature_extractor(x) 
+        out = self.classifier(feat)
+
         expected_shape = (batch_size, self.num_classes)
         assert out.shape == (batch_size, self.num_classes),\
             f"Expected output of forward pass to be: {expected_shape}, but got: {out.shape}"
         return out
 
+def print_best_model(trainer: Trainer):
+
+    trainer.load_best_model()
+
+    trainer.model.eval()
+    train_loss, train_acc = compute_loss_and_accuracy(
+        trainer.dataloader_train, model, trainer.loss_criterion)
+    val_loss, val_acc = compute_loss_and_accuracy(
+        trainer.dataloader_val, model, trainer.loss_criterion)
+    test_loss, test_acc = compute_loss_and_accuracy(
+        trainer.dataloader_test, model, trainer.loss_criterion)
+    
+    print("Best model values:")
+    print(f"Train:\t Loss: {train_loss:.3f} \t Acc: {train_acc:.3f}")
+    print(f"Val  :\t Loss: {val_loss:.3f} \t Acc: {val_acc:.3f}")
+    print(f"Test :\t Loss: {test_loss:.3f} \t Acc: {test_acc:.3f}")
 
 def create_plots(trainer: Trainer, name: str):
     plot_path = pathlib.Path("plots")
@@ -78,13 +107,14 @@ def create_plots(trainer: Trainer, name: str):
 if __name__ == "__main__":
     # Set the random generator seed (parameters, shuffling etc).
     # You can try to change this and check if you still get the same result! 
-    utils.set_seed(0)
+    utils.set_seed(1)
     epochs = 10
-    batch_size = 64
-    learning_rate = 5e-2
+    batch_size = 32
+    learning_rate = 5e-4
     early_stop_count = 4
     dataloaders = load_cifar10(batch_size)
-    model = ExampleModel(image_channels=3, num_classes=10)
+    #model = ExampleModel(image_channels=3, num_classes=10)
+    model = Model()
     trainer = Trainer(
         batch_size,
         learning_rate,
@@ -94,4 +124,6 @@ if __name__ == "__main__":
         dataloaders
     )
     trainer.train()
+    
     create_plots(trainer, "task2")
+    print_best_model(trainer)
