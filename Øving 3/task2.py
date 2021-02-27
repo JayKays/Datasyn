@@ -139,9 +139,9 @@ class Model(nn.Module):
         for param in self.model.layer4.parameters(): # Unfreeze the last 5 convolutional layer
             param.requires_grad = True
         
-        def forward(self, x):
-            x = self.model(x)
-            return x
+    def forward(self, x):
+        x = self.model(x)
+        return x
 
 
 
@@ -165,7 +165,7 @@ if __name__ == "__main__":
     early_stop_count = 4
     dataloaders = load_cifar10(batch_size)
     model = Model()
-    
+
     trainer = Trainer(
         batch_size,
         learning_rate,
