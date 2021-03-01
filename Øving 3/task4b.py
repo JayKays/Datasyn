@@ -90,6 +90,5 @@ def plot_4c():
     plt.savefig(plot_path.joinpath(f"task4c_activations.png"))
     plt.show()
 
-plot_4c()
 
 

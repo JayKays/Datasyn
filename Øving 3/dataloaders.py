@@ -6,12 +6,12 @@ import numpy as np
 np.random.seed(0)
 
 #Task 2/3 mean/std
-# mean = (0.5, 0.5, 0.5)
-# std = (.25, .25, .25)
+mean = (0.5, 0.5, 0.5)
+std = (.25, .25, .25)
 
 #Task 4 mean/std
-mean = (0.485, 0.456, 0.406)
-std = (0.229, 0.224, 0.225)
+# mean = (0.485, 0.456, 0.406)
+# std = (0.229, 0.224, 0.225)
 
 
 def load_cifar10(batch_size: int, validation_fraction: float = 0.1
