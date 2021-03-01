@@ -35,16 +35,22 @@ def compute_loss_and_accuracy(
             Y_batch = utils.to_cuda(Y_batch)
             # Forward pass the images through our model
             output_probs = model(X_batch)
-            # Compute Loss and Accuracy
 
+            #Getting predictions from network output
             pred = torch.argmax(output_probs, dim =1)
+
+            #Adding up total loss and correct predictions
             correct += torch.sum(Y_batch == pred)
             loss += loss_criterion(output_probs, Y_batch)
+
+            #Counting total number of picture to calculate accuracy
             num_pictures += len(Y_batch)
 
+        #Final loss and accuracy calculation
         accuracy = correct/num_pictures
         average_loss = loss/len(dataloader)
 
+    #.detach().cpu().item() to be able to locally plot loss and accuracy
     return average_loss.detach().cpu().item(), accuracy.detach().cpu().item()
 
 
@@ -74,8 +80,8 @@ class Trainer:
         print(self.model)
 
         # Define our optimizer. SGD = Stochastich Gradient Descent
-        self.optimizer = torch.optim.SGD(self.model.parameters(), self.learning_rate)
-        #self.optimizer = torch.optim.Adam(self.model.parameters(), self.learning_rate)
+        self.optimizer = torch.optim.SGD(self.model.parameters(), self.learning_rate)   #Optimizer for task2/3
+        # self.optimizer = torch.optim.Adam(self.model.parameters(), self.learning_rate) #Optimizer ResNet18 (Task4)
 
         # Load our dataset
         self.dataloader_train, self.dataloader_val, self.dataloader_test = dataloaders
