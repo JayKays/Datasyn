@@ -27,32 +27,32 @@ class ExampleModel(nn.Module):
         self.feature_extractor = nn.Sequential(
             nn.Conv2d(3,32,5, padding=2),
             nn.ReLU(),
-            #nn.BatchNorm2d(32),
-            
             nn.MaxPool2d(2,2),
+            nn.BatchNorm2d(32),
+            
             #nn.Dropout2d(p=0.1),
             
-            nn.Conv2d(32,32,5, padding=2),
-            nn.ReLU(),
+            #nn.Conv2d(32,32,5, padding=2),
+            #nn.ReLU(),
             #nn.BatchNorm2d(32),
             
             nn.Conv2d(32,64,5, padding=2),
             nn.ReLU(),
-            #nn.BatchNorm2d(64),
-            
             nn.MaxPool2d(2,2),
+            nn.BatchNorm2d(64),
+            
             #nn.Dropout(p=0.2),
                     
-            nn.Conv2d(64,64,5, padding=2),
-            nn.ReLU(),
+            #nn.Conv2d(64,64,5, padding=2),
+            #nn.ReLU(),
             #nn.BatchNorm2d(64),
             
             #nn.Dropout(p=0.2),
 
             nn.Conv2d(64,128,5, padding=2),
             nn.ReLU(),
-            #nn.BatchNorm2d(128),
             nn.MaxPool2d(2,2),
+            nn.BatchNorm2d(128),
         )
         # The output of feature_extractor will be [batch_size, num_filters, 16, 16]
         self.num_output_features = 4*4*128
@@ -121,6 +121,27 @@ def create_plots(trainer: Trainer, name: str):
     plt.legend()
     plt.savefig(plot_path.joinpath(f"{name}_plot.png"))
     plt.show()
+    
+def create_comp_plots(trainer1: Trainer, trainer2: Trainer, name: str):
+    plot_path = pathlib.Path("plots")
+    plot_path.mkdir(exist_ok=True)
+    # Save plots and show them
+    
+    plt.figure(figsize=(20, 8))
+    plt.subplot(1, 2, 1)
+    plt.title("Cross Entropy Loss")
+    utils.plot_loss(trainer1.train_history["loss"], label="BatchNorm Train", npoints_to_average=10)
+    utils.plot_loss(trainer2.train_history["loss"], label="Task2 Train", npoints_to_average=10)
+    utils.plot_loss(trainer1.validation_history["loss"], label="BatchNorm Validation")
+    utils.plot_loss(trainer2.validation_history["loss"], label="Task2 Validation")
+    plt.legend()
+    plt.subplot(1, 2, 2)
+    plt.title("Accuracy")
+    utils.plot_loss(trainer1.validation_history["accuracy"], label="BatchNorm")
+    utils.plot_loss(trainer2.validation_history["accuracy"], label="Task2")
+    plt.legend()
+    plt.savefig(plot_path.joinpath(f"{name}_plot.png"))
+    plt.show()
 
 
 
@@ -143,6 +164,36 @@ class Model(nn.Module):
         x = self.model(x)
         return x
 
+class Model_task2(nn.Module):
+    def __init__(self, image_channels,num_classes):
+        super().__init__()
+        self.num_classes = num_classes
+        self.num_output_features = 4*4*128
+        self.feature_extractor = nn.Sequential(
+            nn.Conv2d(3,32,5, padding=2),
+            nn.ReLU(),
+            nn.MaxPool2d(2,2),
+            
+            nn.Conv2d(32,64,5, padding=2),
+            nn.ReLU(),
+            nn.MaxPool2d(2,2),
+
+            nn.Conv2d(64,128,5, padding=2),
+            nn.ReLU(),
+            nn.MaxPool2d(2,2),
+        )
+        
+        self.classifier = nn.Sequential(
+            nn.Flatten(),
+            nn.Linear(self.num_output_features, 64),
+            nn.ReLU(),
+            nn.Linear(64, num_classes),
+        )
+        
+    def forward(self, x):
+        feat = self.feature_extractor(x) 
+        out = self.classifier(feat)
+        return out
 
 
 if __name__ == "__main__":
@@ -151,21 +202,21 @@ if __name__ == "__main__":
     utils.set_seed(0)
 
     #Task 2/3 network parameters
-    # epochs = 10
-    # batch_size = 64
-    # learning_rate = 5e-2
-    # early_stop_count = 4
-    # dataloaders = load_cifar10(batch_size)
-    # model = ExampleModel(image_channels=3, num_classes=10)
-
-    #Task 4 parameters
-    epochs = 5
-    batch_size = 32
-    learning_rate = 5e-4
+    epochs = 10
+    batch_size = 64
+    learning_rate = 5e-2
     early_stop_count = 4
     dataloaders = load_cifar10(batch_size)
-    model = Model()
-
+    model = ExampleModel(image_channels=3, num_classes=10)
+    
+    #Task 4 parameters
+    #epochs = 5
+    #batch_size = 32
+    #learning_rate = 5e-4
+    #early_stop_count = 4
+    #dataloaders = load_cifar10(batch_size)
+    #model = Model()
+    
     trainer = Trainer(
         batch_size,
         learning_rate,
@@ -175,6 +226,21 @@ if __name__ == "__main__":
         dataloaders
     )
     trainer.train()
-
-    create_plots(trainer, "task3_Multilayers")
     print_best_model(trainer)
+    
+    model2 = Model_task2(image_channels=3, num_classes=10)
+    trainer2 = Trainer(
+        batch_size,
+        learning_rate,
+        early_stop_count,
+        epochs,
+        model2,
+        dataloaders
+    )
+
+    trainer2.train()
+    print_best_model(trainer2)
+    
+    create_comp_plots(trainer, trainer2, "task3d")
+    
+    
