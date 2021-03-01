@@ -1,3 +1,4 @@
+import pathlib
 import matplotlib.pyplot as plt
 from PIL import Image
 import torchvision
@@ -46,3 +47,12 @@ def torch_image_to_numpy(image: torch.Tensor):
 
 
 indices = [14, 26, 32, 49, 52]
+
+plot_path = pathlib.Path("plots")
+#plot_path.mkdir(exist_ok=True)
+for i in indices:
+    print("activation image",i)
+    act_im = torch_image_to_numpy(activation[0,i,:,:])
+    plt.imshow(act_im, cmap='gray')
+    plt.savefig(plot_path.joinpath(f"task4_activation{i}.png"))
+    plt.show()

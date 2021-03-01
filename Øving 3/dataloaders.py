@@ -19,6 +19,7 @@ def load_cifar10(batch_size: int, validation_fraction: float = 0.1
         transforms.ToTensor(),
         transforms.Normalize(mean_4a, std_4a),
         transforms.Resize(size=(224,224)),
+   
     ])
     transform_test = transforms.Compose([
         transforms.ToTensor(),
