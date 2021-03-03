@@ -80,7 +80,7 @@ class ExampleModel(nn.Module):
         assert out.shape == (batch_size, self.num_classes),\
             f"Expected output of forward pass to be: {expected_shape}, but got: {out.shape}"
         return out
-    
+
 #function to print out loss and accuracy for the best performing model of a trainer
 def print_best_model(trainer: Trainer):
 
@@ -88,11 +88,11 @@ def print_best_model(trainer: Trainer):
 
     trainer.model.eval()
     train_loss, train_acc = compute_loss_and_accuracy(
-        trainer.dataloader_train, model, trainer.loss_criterion)
+        trainer.dataloader_train, trainer.model, trainer.loss_criterion)
     val_loss, val_acc = compute_loss_and_accuracy(
-        trainer.dataloader_val, model, trainer.loss_criterion)
+        trainer.dataloader_val, trainer.model, trainer.loss_criterion)
     test_loss, test_acc = compute_loss_and_accuracy(
-        trainer.dataloader_test, model, trainer.loss_criterion)
+        trainer.dataloader_test, trainer.model, trainer.loss_criterion)
     
     print("Best model values:")
     print(f"Train:\t Loss: {train_loss:.3f} \t Acc: {train_acc:.3f}")
@@ -201,11 +201,11 @@ if __name__ == "__main__":
     learning_rate = 5e-2
     early_stop_count = 4
     dataloaders = load_cifar10(batch_size)
-    model = ExampleModel(image_channels=3, num_classes=10)
-    model2 = Model_task2(image_channels=3, num_classes=10) 
-    
+    model3 = ExampleModel(image_channels=3, num_classes=10)
+    model2 = Model_task2(image_channels=3, num_classes=10)
+
     #Task2 model trainer
-    trainer2 = Trainer(
+    task2_trainer = Trainer(
         batch_size,
         learning_rate,
         early_stop_count,
@@ -213,38 +213,36 @@ if __name__ == "__main__":
         model2,
         dataloaders
     )
-    #trainer2.train()
-    #print_best_model(trainer2)
+    task2_trainer.train()
+    print_best_model(task2_trainer)
 
     #Final task3 model trainer
-    trainer = Trainer(
+    task3_trainer = Trainer(
         batch_size,
         learning_rate,
         early_stop_count,
         epochs,
-        model,
+        model3,
         dataloaders
     )
-    #trainer.train()
-    #print_best_model(trainer)
-    
+    #task3_trainer.train()
+    #print_best_model(task3_trainer)
+
     #Task 4 parameters (Remember to change optimizer in trainer.py, and mean/std in dataloaders.py)
     epochs = 5
     batch_size = 32
     learning_rate = 5e-4
     early_stop_count = 4
     dataloaders = load_cifar10(batch_size)
-    model = Model()
-    
-    trainer4 = Trainer(
+    model4 = Model()
+
+    task4_trainer = Trainer(
             batch_size,
             learning_rate,
             early_stop_count,
             epochs,
-            model,
+            model4,
             dataloaders
         )
-    # trainer4.train()
-    # print_best_model(trainer4)
-    
-    
+    # task4_trainer.train()
+    # print_best_model(task4_trainer)

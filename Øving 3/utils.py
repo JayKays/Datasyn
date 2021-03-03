@@ -32,22 +32,6 @@ def to_cuda(elements):
         return elements.cuda()
     return elements
 
-def to_cpu(elements):
-    """
-    Transfers every object in elements to CPU RAM if available.    
-    """
-    if torch.cuda.is_available():
-        if type(elements) == torch.Tensor:
-            return elements.cpu()
-        elif type(elements) == dict:
-            new = {}
-            for key in elements.keys():
-                ten = to_cpu(elements[key])
-                new[key] = ten
-            return new
-        return elements.cpu()
-    return elements
-
 def save_checkpoint(state_dict: dict,
                     filepath: pathlib.Path,
                     is_best: bool,
