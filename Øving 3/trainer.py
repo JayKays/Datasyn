@@ -80,8 +80,8 @@ class Trainer:
         print(self.model)
 
         # Define our optimizer. SGD = Stochastich Gradient Descent
-        #self.optimizer = torch.optim.SGD(self.model.parameters(), self.learning_rate)   #Optimizer for task2/3
-        self.optimizer = torch.optim.Adam(self.model.parameters(), self.learning_rate) #Optimizer ResNet18 (Task4)
+        self.optimizer = torch.optim.SGD(self.model.parameters(), self.learning_rate)   #Optimizer for task2/3
+        #self.optimizer = torch.optim.Adam(self.model.parameters(), self.learning_rate) #Optimizer ResNet18 (Task4)
 
         # Load our dataset
         self.dataloader_train, self.dataloader_val, self.dataloader_test = dataloaders
