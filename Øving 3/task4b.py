@@ -25,7 +25,6 @@ print("Image shape:", image.shape)
 activation = first_conv_layer(image)
 print("Activation shape:", activation.shape)
 
-
 def torch_image_to_numpy(image: torch.Tensor):
     """
     Function to transform a pytorch tensor to numpy image
@@ -50,9 +49,17 @@ indices = [14, 26, 32, 49, 52]
 
 plot_path = pathlib.Path("plots")
 #plot_path.mkdir(exist_ok=True)
-for i in indices:
-    print("activation image",i)
-    act_im = torch_image_to_numpy(activation[0,i,:,:])
-    plt.imshow(act_im, cmap='gray')
-    plt.savefig(plot_path.joinpath(f"task4_activation{i}.png"))
-    plt.show()
+#for i in indices:                      #4b
+#    print("activation image",i)
+#    act_im = torch_image_to_numpy(activation[0,i,:,:])
+#    plt.imshow(act_im, cmap='gray')
+#    plt.savefig(plot_path.joinpath(f"task4_activation{i}.png"))
+#    plt.show()
+
+for name, module in model.named_children():          #4c
+    if (name != 'avgpool' and name != 'fc'):
+        print(name)
+        image = module(image)
+print(image.shape)
+im = torch_image_to_numpy(image[0,:,:,:])
+plt.imshow(act_im, cmap='gray')
