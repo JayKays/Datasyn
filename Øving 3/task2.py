@@ -25,32 +25,34 @@ class ExampleModel(nn.Module):
         self.feature_extractor = nn.Sequential(
             nn.Conv2d(3,32,5, padding=2),
             nn.ReLU(),
-            nn.MaxPool2d(2,2),
             nn.BatchNorm2d(32),
-            
+                        
             nn.Dropout2d(p=0.1),
-            
+             
             nn.Conv2d(32,32,5, padding=2),
             nn.ReLU(),
             nn.BatchNorm2d(32),
+            nn.MaxPool2d(2,2),
+            
+            nn.Dropout2d(p=0.1),
             
             nn.Conv2d(32,64,5, padding=2),
             nn.ReLU(),
-            nn.MaxPool2d(2,2),
             nn.BatchNorm2d(64),
-            
+           
             nn.Dropout(p=0.2),
                     
             nn.Conv2d(64,64,5, padding=2),
             nn.ReLU(),
             nn.BatchNorm2d(64),
+            nn.MaxPool2d(2,2),
             
             nn.Dropout(p=0.2),
 
             nn.Conv2d(64,128,5, padding=2),
             nn.ReLU(),
-            nn.MaxPool2d(2,2),
             nn.BatchNorm2d(128),
+            nn.MaxPool2d(2,2)
         )
 
         # Initialize our last fully connected layer
@@ -142,7 +144,7 @@ class Model_task2(nn.Module):
             nn.Flatten(),
             nn.Linear(self.num_output_features, 64),
             nn.ReLU(),
-            nn.Linear(64, num_classes),
+            nn.Linear(64, num_classes)
         )
         
     def forward(self, x):
@@ -213,8 +215,8 @@ if __name__ == "__main__":
         model2,
         dataloaders
     )
-    task2_trainer.train()
-    print_best_model(task2_trainer)
+    #task2_trainer.train()
+    #print_best_model(task2_trainer)
 
     #Final task3 model trainer
     task3_trainer = Trainer(
@@ -228,7 +230,7 @@ if __name__ == "__main__":
     #task3_trainer.train()
     #print_best_model(task3_trainer)
 
-    #Task 4 parameters (Remember to change optimizer in trainer.py, and mean/std in dataloaders.py)
+    #Task 4 parameters (Remember to change optimizer in trainer.py, and mean/std and add resize in dataloaders.py)
     epochs = 5
     batch_size = 32
     learning_rate = 5e-4
@@ -244,5 +246,8 @@ if __name__ == "__main__":
             model4,
             dataloaders
         )
-    # task4_trainer.train()
-    # print_best_model(task4_trainer)
+    #task4_trainer.train()
+    #print_best_model(task4_trainer)
+    
+    #create_comp_plots(task3_trainer, task2_trainer, "task3d")
+    #create_plots(task2_trainer, "task2")
