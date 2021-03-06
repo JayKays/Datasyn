@@ -91,4 +91,5 @@ def plot_4c():
     plt.show()
 
 
-
+plot_4b()
+plot_4c()

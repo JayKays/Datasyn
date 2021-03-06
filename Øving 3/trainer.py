@@ -43,14 +43,14 @@ def compute_loss_and_accuracy(
             correct += torch.sum(Y_batch == pred)
             loss += loss_criterion(output_probs, Y_batch)
 
-            #Counting total number of picture to calculate accuracy
+            #Counting total number of pictures to calculate accuracy
             num_pictures += len(Y_batch)
 
-        #Final loss and accuracy calculation
+        #Final loss and accuracy calculations
         accuracy = correct/num_pictures
         average_loss = loss/len(dataloader)
 
-    #.detach().cpu().item() to be able to locally plot loss and accuracy
+    #.detach().cpu().item() to be able to locally plot loss and accuracy from GPU
     return average_loss.detach().cpu().item(), accuracy.detach().cpu().item()
 
 

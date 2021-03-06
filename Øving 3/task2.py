@@ -249,5 +249,3 @@ if __name__ == "__main__":
     #task4_trainer.train()
     #print_best_model(task4_trainer)
     
-    #create_comp_plots(task3_trainer, task2_trainer, "task3d")
-    #create_plots(task2_trainer, "task2")
