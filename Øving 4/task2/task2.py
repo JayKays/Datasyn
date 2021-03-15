@@ -18,9 +18,19 @@ def calculate_iou(prediction_box, gt_box):
     # YOUR CODE HERE
 
     # Compute intersection
+    x_int = np.minimum(prediction_box[2], gt_box[2]) - np.maximum(prediction_box[0], gt_box[0]) 
+    y_int = np.minimum(prediction_box[3], gt_box[3]) - np.maximum(prediction_box[1], gt_box[1])
+    x_int = np.maximum(x_int, 0)
+    y_int = np.maximum(y_int, 0)
 
+    intersection = x_int * y_int
+    
     # Compute union
-    iou = 0
+    pred_area = (prediction_box[2] - prediction_box[0]) * (prediction_box[3] - prediction_box[1])
+    gt_area = (gt_box[2] - gt_box[0]) * (gt_box[3]- gt_box[1])
+    union = pred_area + gt_area - intersection
+
+    iou = intersection/union
     assert iou >= 0 and iou <= 1
     return iou
 
@@ -36,7 +46,12 @@ def calculate_precision(num_tp, num_fp, num_fn):
     Returns:
         float: value of precision
     """
-    raise NotImplementedError
+
+    if num_tp + num_fp == 0: return 1
+
+    precision = num_tp/(num_tp + num_fp)
+
+    return precision
 
 
 def calculate_recall(num_tp, num_fp, num_fn):
@@ -49,7 +64,11 @@ def calculate_recall(num_tp, num_fp, num_fn):
     Returns:
         float: value of recall
     """
-    raise NotImplementedError
+    if num_tp + num_fp == 0: return 0
+
+    recall = num_tp/(num_tp + num_fn)
+
+    return recall
 
 
 def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
@@ -72,16 +91,23 @@ def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
             objects with shape: [number of box matches, 4].
             Each row includes [xmin, ymin, xmax, ymax]
     """
-    # Find all possible matches with a IoU >= iou threshold
 
+    pred_matches = []
+    gt_matches = []
 
-    # Sort all matches on IoU in descending order
-
-    # Find all matches with the highest IoU threshold
-
-
-
-    return np.array([]), np.array([])
+    for pred in prediction_boxes:
+        max_iou = 0
+        match = None
+        for gt in gt_boxes:
+            iou = calculate_iou(pred, gt)
+            if (iou >= iou_threshold) and (iou > max_iou):
+                max_iou = iou
+                match = gt
+        if max_iou > 0 and match is not None:
+            pred_matches.append(pred)
+            gt_matches.append(match)
+    
+    return np.array(pred_matches), np.array(gt_matches)
 
 
 def calculate_individual_image_result(prediction_boxes, gt_boxes, iou_threshold):
@@ -102,7 +128,9 @@ def calculate_individual_image_result(prediction_boxes, gt_boxes, iou_threshold)
             {"true_pos": int, "false_pos": int, false_neg": int}
     """
 
-    raise NotImplementedError
+    
+
+    return {}
 
 
 def calculate_precision_recall_all_images(
