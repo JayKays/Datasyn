@@ -167,14 +167,14 @@ def calculate_precision_recall_all_images(
     recall = 0
     for i in range(len(all_prediction_boxes)):
         res = calculate_individual_image_result(all_prediction_boxes[i], all_gt_boxes[i], iou_threshold)
-        
+
         precision += calculate_precision(res["true_pos"], res["false_pos"], res["false_neg"])
         recall += calculate_recall(res["true_pos"], res["false_pos"], res["false_neg"])
     
     precision /= len(all_prediction_boxes)
     recall /= len(all_prediction_boxes)
     
-    return (precision ,recall)
+    return (precision, recall)
 
 
 def get_precision_recall_curve(
@@ -206,10 +206,19 @@ def get_precision_recall_curve(
     # Instead of going over every possible confidence score threshold to compute the PR
     # curve, we will use an approximation
     confidence_thresholds = np.linspace(0, 1, 500)
-    # YOUR CODE HERE
-
+    # YOUR CODE 
     precisions = [] 
     recalls = []
+    for ct in confidence_thresholds:
+        conf_pred_boxes = [] 
+        for i in range(len(confidence_scores)):
+            conf_pred_boxes.append(all_prediction_boxes[i][confidence_scores[i] > ct,:])
+        
+        pr = calculate_precision_recall_all_images(conf_pred_boxes, all_gt_boxes, iou_threshold)
+
+        precisions.append(pr[0])
+        recalls.append(pr[1])
+
     return np.array(precisions), np.array(recalls)
 
 
@@ -246,8 +255,10 @@ def calculate_mean_average_precision(precisions, recalls):
     # Calculate the mean average precision given these recall levels.
     recall_levels = np.linspace(0, 1.0, 11)
     # YOUR CODE HERE
-    average_precision = 0
-    return average_precision
+    
+
+    mean_AP = 0
+    return mean_AP
 
 
 def mean_average_precision(ground_truth_boxes, predicted_boxes):
