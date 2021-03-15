@@ -109,7 +109,6 @@ def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
     
     return np.array(pred_matches), np.array(gt_matches)
 
-
 def calculate_individual_image_result(prediction_boxes, gt_boxes, iou_threshold):
     """Given a set of prediction boxes and ground truth boxes,
        calculates true positives, false positives and false negatives
@@ -127,10 +126,21 @@ def calculate_individual_image_result(prediction_boxes, gt_boxes, iou_threshold)
         dict: containing true positives, false positives, true negatives, false negatives
             {"true_pos": int, "false_pos": int, false_neg": int}
     """
+    _, gt_matched = get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold)
 
-    
+    #Number of predictions and and gt boxes to predict
+    positives = prediction_boxes.shape[0]
+    relevant = gt_boxes.shape[0]
 
-    return {}
+    #Number of detected gt boxes
+    true_pos = np.unique(gt_matched, axis = 0).shape[0]
+
+    res = {}
+    res["true_pos"] = true_pos
+    res["false_pos"] = positives - res["true_pos"]
+    res["false_neg"] = relevant - res["true_pos"]
+
+    return res
 
 
 def calculate_precision_recall_all_images(
@@ -152,7 +162,19 @@ def calculate_precision_recall_all_images(
     Returns:
         tuple: (precision, recall). Both float.
     """
-    raise NotImplementedError
+    
+    precision = 0
+    recall = 0
+    for i in range(len(all_prediction_boxes)):
+        res = calculate_individual_image_result(all_prediction_boxes[i], all_gt_boxes[i], iou_threshold)
+        
+        precision += calculate_precision(res["true_pos"], res["false_pos"], res["false_neg"])
+        recall += calculate_recall(res["true_pos"], res["false_pos"], res["false_neg"])
+    
+    precision /= len(all_prediction_boxes)
+    recall /= len(all_prediction_boxes)
+    
+    return (precision ,recall)
 
 
 def get_precision_recall_curve(
