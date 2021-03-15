@@ -100,7 +100,7 @@ def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
         match = None
         for gt in gt_boxes:
             iou = calculate_iou(pred, gt)
-            if (iou >= iou_threshold) and (iou > max_iou):
+            if (iou >= iou_threshold) and (iou >= max_iou):
                 max_iou = iou
                 match = gt
         if max_iou > 0 and match is not None:
@@ -163,16 +163,17 @@ def calculate_precision_recall_all_images(
         tuple: (precision, recall). Both float.
     """
     
-    precision = 0
-    recall = 0
+    true_pos = 0
+    false_pos = 0
+    false_neg = 0
     for i in range(len(all_prediction_boxes)):
         res = calculate_individual_image_result(all_prediction_boxes[i], all_gt_boxes[i], iou_threshold)
+        true_pos += res["true_pos"]
+        false_pos += res["false_pos"]
+        false_neg += res["false_neg"]
 
-        precision += calculate_precision(res["true_pos"], res["false_pos"], res["false_neg"])
-        recall += calculate_recall(res["true_pos"], res["false_pos"], res["false_neg"])
-    
-    precision /= len(all_prediction_boxes)
-    recall /= len(all_prediction_boxes)
+    precision = calculate_precision(true_pos, false_pos, false_neg)
+    recall = calculate_recall(true_pos, false_pos, false_neg)
     
     return (precision, recall)
 
@@ -212,7 +213,7 @@ def get_precision_recall_curve(
     for ct in confidence_thresholds:
         conf_pred_boxes = [] 
         for i in range(len(confidence_scores)):
-            conf_pred_boxes.append(all_prediction_boxes[i][confidence_scores[i] > ct,:])
+            conf_pred_boxes.append(all_prediction_boxes[i][confidence_scores[i] >= ct,:])
         
         pr = calculate_precision_recall_all_images(conf_pred_boxes, all_gt_boxes, iou_threshold)
 
@@ -255,10 +256,13 @@ def calculate_mean_average_precision(precisions, recalls):
     # Calculate the mean average precision given these recall levels.
     recall_levels = np.linspace(0, 1.0, 11)
     # YOUR CODE HERE
-    
 
-    mean_AP = 0
-    return mean_AP
+    prec_values = []
+    for level in recall_levels:
+        prec = [p for p,r in zip(precisions, recalls) if r >= level]
+        prec_values.append(max(prec) if prec else 0)
+
+    return np.mean(prec_values)
 
 
 def mean_average_precision(ground_truth_boxes, predicted_boxes):
