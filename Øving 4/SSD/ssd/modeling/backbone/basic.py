@@ -21,7 +21,7 @@ class BasicModel(torch.nn.Module):
         self.output_feature_shape = cfg.MODEL.PRIORS.FEATURE_MAPS
 
         self.map1 = nn.Sequential(
-            nn.Conv2d(image_channels, 32,3, 1, 1),
+            nn.Conv2d(image_channels, 32, 3, 1, 1),
             nn.MaxPool2d(2,2),
             nn.ReLU(),
 
@@ -30,7 +30,6 @@ class BasicModel(torch.nn.Module):
             nn.ReLU(),
             
             nn.Conv2d(64, 64,3, 1, 1),
-            nn.MaxPool2d(2,2),
             nn.ReLU(),
             
             nn.Conv2d(64, output_channels[0], 3, 2, 1)
@@ -64,11 +63,11 @@ class BasicModel(torch.nn.Module):
             nn.Conv2d(128, output_channels[4], 3, 2, 1)
         )
 
-        self.map5 = nn.Sequential(
+        self.map6 = nn.Sequential(
             nn.ReLU(),
             nn.Conv2d(output_channels[4], 128, 3, 1, 1),
             nn.ReLU(),
-            nn.Conv2d(128, output_channels[5], 3, 2, 1)
+            nn.Conv2d(128, output_channels[5], 3, 1, 0)
         )
 
 
@@ -103,7 +102,7 @@ class BasicModel(torch.nn.Module):
 
         for idx, feature in enumerate(out_features):
             w, h = self.output_feature_shape[idx]
-            expected_shape = (out_channel, h, w)
+            expected_shape = (self.output_channels[idx], h, w)
             assert feature.shape[1:] == expected_shape, \
                 f"Expected shape: {expected_shape}, got: {feature.shape[1:]} at output IDX: {idx}"
         return tuple(out_features)
