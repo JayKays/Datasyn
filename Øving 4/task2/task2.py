@@ -261,7 +261,7 @@ def calculate_mean_average_precision(precisions, recalls):
     for level in recall_levels:
         prec = [p for p,r in zip(precisions, recalls) if r >= level]
         prec_values.append(max(prec) if prec else 0)
-
+    print(prec_values)
     return np.mean(prec_values)
 
 
@@ -303,6 +303,14 @@ def mean_average_precision(ground_truth_boxes, predicted_boxes):
 
 
 if __name__ == "__main__":
-    ground_truth_boxes = read_ground_truth_boxes()
-    predicted_boxes = read_predicted_boxes()
-    mean_average_precision(ground_truth_boxes, predicted_boxes)
+    # ground_truth_boxes = read_ground_truth_boxes()
+    # predicted_boxes = read_predicted_boxes()
+    # mean_average_precision(ground_truth_boxes, predicted_boxes)
+
+    p1 = np.array([1,1,1,0.5,0.2])
+    r1 = np.array([0.05,0.1,0.4,0.7,1])
+    p2 = np.array([1.0,0.8,0.6,0.5,0.2])
+    r2 = np.array([0.3,0.4,0.5,0.7,1])
+
+    print(calculate_mean_average_precision(p1,r1))
+    print(calculate_mean_average_precision(p2,r2))
