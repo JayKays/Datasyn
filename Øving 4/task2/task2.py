@@ -261,7 +261,6 @@ def calculate_mean_average_precision(precisions, recalls):
     for level in recall_levels:
         prec = [p for p,r in zip(precisions, recalls) if r >= level]
         prec_values.append(max(prec) if prec else 0)
-    print(prec_values)
     return np.mean(prec_values)
 
 
