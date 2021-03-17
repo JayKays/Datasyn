@@ -199,19 +199,16 @@ class BasicModel(torch.nn.Module):
             nn.MaxPool2d(2,2),
             nn.LeakyReLU(),
             
-            
+            nn.Conv2d(32, 32, 3, 1, 1),
+#             nn.BatchNorm2d(32),
+            nn.LeakyReLU(),
+
             nn.Conv2d(32, 64, 3, 1, 1),
             nn.BatchNorm2d(64),
             nn.MaxPool2d(2,2),
             nn.LeakyReLU(),
             
-            
-            nn.Conv2d(64, 64, 3, 1, 1),
-            nn.BatchNorm2d(64),
-            nn.LeakyReLU(),
-            
-            
-            nn.Conv2d(64, 64, 3, 1, 1),
+            nn.Conv2d(64, 64,3, 1, 1),
             nn.BatchNorm2d(64),
             nn.LeakyReLU(),
             
@@ -219,7 +216,6 @@ class BasicModel(torch.nn.Module):
         )
 
         self.map2 = nn.Sequential(
-            
             nn.LeakyReLU(),
             nn.Conv2d(output_channels[0], 128, 3, 1, 1),
             nn.BatchNorm2d(128),
@@ -233,55 +229,24 @@ class BasicModel(torch.nn.Module):
         )
 
         self.map3 = nn.Sequential(
-            
             nn.LeakyReLU(),
             nn.Conv2d(output_channels[1], 256, 3, 1, 1),
-            nn.LeakyReLU(),
-            
-            nn.Conv2d(256, 256, 3, 1, 1),
             nn.BatchNorm2d(256),
             nn.LeakyReLU(),
-            
-            nn.Conv2d(256, 256, 3, 1, 1),
-            nn.BatchNorm2d(256),
-            nn.LeakyReLU(),
-            
-            nn.BatchNorm2d(256),
             nn.Conv2d(256, output_channels[2], 3, 2, 1)
         )
 
         self.map4 = nn.Sequential(
-            
             nn.LeakyReLU(),
             nn.Conv2d(output_channels[2], 128, 3, 1, 1),
-            nn.LeakyReLU(),
-            
-            
-            nn.Conv2d(128, 128, 3, 1, 1),
             nn.BatchNorm2d(128),
             nn.LeakyReLU(),
-            
-            
-            nn.Conv2d(128, 128, 3, 1, 1),
-            nn.BatchNorm2d(128),
-            nn.LeakyReLU(),
-            
-            
-            nn.Conv2d(128,128, 3, 1, 1),
-            nn.BatchNorm2d(128),
-            nn.LeakyReLU(),
-            
-            nn.BatchNorm2d(128),
             nn.Conv2d(128, output_channels[3], 3, 2, 1)
         )
-        
+
         self.map5 = nn.Sequential(
-            
             nn.LeakyReLU(),
             nn.Conv2d(output_channels[3], 128, 3, 1, 1),
-            nn.LeakyReLU(),
-            
-            nn.Conv2d(128, 128, 3, 1, 1),
             nn.BatchNorm2d(128),
             nn.LeakyReLU(),
             
@@ -289,12 +254,10 @@ class BasicModel(torch.nn.Module):
             nn.BatchNorm2d(128),
             nn.LeakyReLU(),
             
-            nn.BatchNorm2d(128),
             nn.Conv2d(128, output_channels[4], 3, 2, 1)
         )
 
         self.map6 = nn.Sequential(
-            
             nn.LeakyReLU(),
             nn.Conv2d(output_channels[4], 128, 3, 1, 1),
             nn.BatchNorm2d(128),
@@ -304,13 +267,9 @@ class BasicModel(torch.nn.Module):
             nn.BatchNorm2d(128),
             nn.LeakyReLU(),
             
-            
-            nn.Conv2d(128, 128, 3, 1, 1),
-            nn.BatchNorm2d(128),
-            nn.LeakyReLU(),
-            
             nn.Conv2d(128, output_channels[5], 3, 1, 0)
         )
+        
 
     def forward(self, x):
         """
