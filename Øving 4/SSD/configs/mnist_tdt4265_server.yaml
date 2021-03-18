@@ -11,7 +11,7 @@ DATASETS:
     TRAIN: ("mnist_detection_train", "mnist_detection_val")
     TEST: ("mnist_detection_val", )
 SOLVER:
-    MAX_ITER: 10000
+    MAX_ITER: 6000
     GAMMA: 0.1
     BATCH_SIZE: 16
     LR: 2e-3

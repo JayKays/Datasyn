@@ -21,7 +21,6 @@ class BasicModel(torch.nn.Module):
         self.output_feature_shape = cfg.MODEL.PRIORS.FEATURE_MAPS
         
         #Basics backbone 
-        '''
         self.map1 = nn.Sequential(
             nn.Conv2d(image_channels, 32, 3, 1, 1),
             nn.MaxPool2d(2,2),
@@ -71,7 +70,7 @@ class BasicModel(torch.nn.Module):
             nn.ReLU(),
             nn.Conv2d(128, output_channels[5], 3, 1, 0)
         )
-        '''
+        
         
         #87% mAP
         '''
@@ -193,14 +192,10 @@ class BasicModel(torch.nn.Module):
             nn.Conv2d(128, output_channels[5], 3, 1, 0)
         )
         '''
-        
+        '''
         self.map1 = nn.Sequential(
             nn.Conv2d(image_channels, 32, 3, 1, 1),
             nn.MaxPool2d(2,2),
-            nn.LeakyReLU(),
-            
-            nn.Conv2d(32, 32, 3, 1, 1),
-#             nn.BatchNorm2d(32),
             nn.LeakyReLU(),
 
             nn.Conv2d(32, 64, 3, 1, 1),
@@ -241,16 +236,17 @@ class BasicModel(torch.nn.Module):
             nn.Conv2d(output_channels[2], 128, 3, 1, 1),
             nn.BatchNorm2d(128),
             nn.LeakyReLU(),
+            
+            nn.Conv2d(128, 128, 3, 1, 1),
+            nn.BatchNorm2d(128),
+            nn.LeakyReLU(),
+            
             nn.Conv2d(128, output_channels[3], 3, 2, 1)
         )
 
         self.map5 = nn.Sequential(
             nn.LeakyReLU(),
             nn.Conv2d(output_channels[3], 128, 3, 1, 1),
-            nn.BatchNorm2d(128),
-            nn.LeakyReLU(),
-            
-            nn.Conv2d(128, 128, 3, 1, 1),
             nn.BatchNorm2d(128),
             nn.LeakyReLU(),
             
@@ -264,12 +260,11 @@ class BasicModel(torch.nn.Module):
             nn.LeakyReLU(),
             
             nn.Conv2d(128, 128, 3, 1, 1),
-            nn.BatchNorm2d(128),
             nn.LeakyReLU(),
             
             nn.Conv2d(128, output_channels[5], 3, 1, 0)
         )
-        
+        '''
 
     def forward(self, x):
         """
