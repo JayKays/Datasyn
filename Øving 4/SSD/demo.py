@@ -51,6 +51,7 @@ def run_demo(cfg, ckpt, score_threshold, images_dir: pathlib.Path, output_dir: p
         boxes = boxes[indices]
         labels = labels[indices]
         scores = scores[indices]
+        print(image_path, "\t\t", scores, "\t\t", class_names[labels])
         drawn_image = draw_boxes(
             image, boxes, labels, scores, class_names).astype(np.uint8)
         drawn_images.append(drawn_image)

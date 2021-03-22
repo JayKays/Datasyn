@@ -29,8 +29,10 @@ def calculate_iou(prediction_box, gt_box):
     pred_area = (prediction_box[2] - prediction_box[0]) * (prediction_box[3] - prediction_box[1])
     gt_area = (gt_box[2] - gt_box[0]) * (gt_box[3]- gt_box[1])
     union = pred_area + gt_area - intersection
-
+    
+    #Final iou fraction
     iou = intersection/union
+    
     assert iou >= 0 and iou <= 1
     return iou
 
@@ -94,7 +96,8 @@ def get_all_box_matches(prediction_boxes, gt_boxes, iou_threshold):
 
     pred_matches = []
     gt_matches = []
-
+    
+    #Find best gt match for each pred box by iou
     for pred in prediction_boxes:
         max_iou = 0
         match = None
@@ -166,12 +169,15 @@ def calculate_precision_recall_all_images(
     true_pos = 0
     false_pos = 0
     false_neg = 0
+    
+    #Counting all TP, FP and FN over all iamges
     for i in range(len(all_prediction_boxes)):
         res = calculate_individual_image_result(all_prediction_boxes[i], all_gt_boxes[i], iou_threshold)
         true_pos += res["true_pos"]
         false_pos += res["false_pos"]
         false_neg += res["false_neg"]
-
+    
+    #Calculating total precision and recall
     precision = calculate_precision(true_pos, false_pos, false_neg)
     recall = calculate_recall(true_pos, false_pos, false_neg)
     
@@ -210,13 +216,15 @@ def get_precision_recall_curve(
     # YOUR CODE 
     precisions = [] 
     recalls = []
+    
     for ct in confidence_thresholds:
         conf_pred_boxes = [] 
+        #Finding all pred boxes above confidence threshold
         for i in range(len(confidence_scores)):
             conf_pred_boxes.append(all_prediction_boxes[i][confidence_scores[i] >= ct,:])
         
+        #Calculating prec and recall for confident predictions
         pr = calculate_precision_recall_all_images(conf_pred_boxes, all_gt_boxes, iou_threshold)
-
         precisions.append(pr[0])
         recalls.append(pr[1])
 
@@ -254,13 +262,17 @@ def calculate_mean_average_precision(precisions, recalls):
         float: mean average precision
     """
     # Calculate the mean average precision given these recall levels.
-    recall_levels = np.linspace(0, 1.0, 11)
+    #Rounding removes floating point imprecision, which might give wrong calculations
+    recall_levels = np.round(np.linspace(0, 1.0, 11), decimals = 14)
     # YOUR CODE HERE
-
+    
     prec_values = []
     for level in recall_levels:
+        #Fetching maximum precision for every (p,r) pair 
+        #where recalls is above current threshold
         prec = [p for p,r in zip(precisions, recalls) if r >= level]
         prec_values.append(max(prec) if prec else 0)
+        
     return np.mean(prec_values)
 
 
@@ -302,14 +314,6 @@ def mean_average_precision(ground_truth_boxes, predicted_boxes):
 
 
 if __name__ == "__main__":
-    # ground_truth_boxes = read_ground_truth_boxes()
-    # predicted_boxes = read_predicted_boxes()
-    # mean_average_precision(ground_truth_boxes, predicted_boxes)
-
-    p1 = np.array([1,1,1,0.5,0.2])
-    r1 = np.array([0.05,0.1,0.4,0.7,1])
-    p2 = np.array([1.0,0.8,0.6,0.5,0.2])
-    r2 = np.array([0.3,0.4,0.5,0.7,1])
-
-    print(calculate_mean_average_precision(p1,r1))
-    print(calculate_mean_average_precision(p2,r2))
+    ground_truth_boxes = read_ground_truth_boxes()
+    predicted_boxes = read_predicted_boxes()
+    mean_average_precision(ground_truth_boxes, predicted_boxes)

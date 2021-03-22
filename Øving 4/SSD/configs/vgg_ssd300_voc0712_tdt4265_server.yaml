@@ -2,11 +2,12 @@ MODEL:
     NUM_CLASSES: 21
 INPUT:
     IMAGE_SIZE: [300, 300]
+    PIXEL_STD: [0.003921569, 0.003921569, 0.003921569]
 DATASETS:
     TRAIN: ("voc_2007_trainval", "voc_2012_trainval")
     TEST: ("voc_2007_test", )
 SOLVER:
-    MAX_ITER: 100000
+    MAX_ITER: 5000
     GAMMA: 0.1
     BATCH_SIZE: 16
     LR: 5e-4
